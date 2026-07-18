@@ -151,6 +151,17 @@ Omit `strum` entirely when the song has no prescribed right-hand pattern.
 | `chord` | string | e.g. `Am`, `F#m`, `G7`, `N.C.` |
 | `lyrics` | string | Optional lyric fragment for this span |
 
+**Multi-chord lyric lines (ChordPro-style sheets):** put the full line on the
+**first** chord of the group; leave following chords with `lyrics: ""`. The
+player lyrics scroller extends the phrase through those empty events so text
+stays visible for the whole line, e.g.:
+
+```
+D (lyrics: "Я просыпаюсь в холодном поту,") → A ("") → Bm ("")
+```
+
+renders as one phrase spanning 12 beats under D–A–Bm.
+
 **v1 convention:** `beat` is **absolute from the start of the song** (not reset per section). Sections only group for display.
 
 ### Accompaniment styles (v1)

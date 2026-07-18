@@ -1,0 +1,620 @@
+{
+  "schemaVersion": 1,
+  "id": "dyhanie",
+  "title": "Дыхание",
+  "artist": "Наутилус Помпилиус",
+  "key": "Bm",
+  "capo": 0,
+  "tempoBpm": 76,
+  "timeSignature": [
+    4,
+    4
+  ],
+  "tags": [
+    "russian",
+    "rock",
+    "beginner",
+    "practice"
+  ],
+  "audio": null,
+  "strum": {
+    "name": "Шестёрка",
+    "unitBeats": 0.666667,
+    "steps": [
+      "D",
+      "D",
+      "U",
+      "U",
+      "D",
+      "U"
+    ]
+  },
+  "sections": [
+    {
+      "id": "intro",
+      "name": "Intro",
+      "events": [
+        {
+          "beat": 0,
+          "durationBeats": 4,
+          "chord": "Bm",
+          "lyrics": ""
+        },
+        {
+          "beat": 4,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": ""
+        },
+        {
+          "beat": 8,
+          "durationBeats": 4,
+          "chord": "Bm",
+          "lyrics": ""
+        },
+        {
+          "beat": 12,
+          "durationBeats": 4,
+          "chord": "G",
+          "lyrics": ""
+        },
+        {
+          "beat": 16,
+          "durationBeats": 4,
+          "chord": "Bm",
+          "lyrics": ""
+        },
+        {
+          "beat": 20,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": ""
+        },
+        {
+          "beat": 24,
+          "durationBeats": 4,
+          "chord": "Bm",
+          "lyrics": ""
+        },
+        {
+          "beat": 28,
+          "durationBeats": 4,
+          "chord": "G",
+          "lyrics": ""
+        }
+      ]
+    },
+    {
+      "id": "verse1",
+      "name": "Verse 1",
+      "events": [
+        {
+          "beat": 32,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "Я просыпаюсь в холодном поту,"
+        },
+        {
+          "beat": 36,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": ""
+        },
+        {
+          "beat": 40,
+          "durationBeats": 4,
+          "chord": "Bm",
+          "lyrics": ""
+        },
+        {
+          "beat": 44,
+          "durationBeats": 4,
+          "chord": "F#",
+          "lyrics": "Я просыпаюсь в кошмарном бреду,"
+        },
+        {
+          "beat": 48,
+          "durationBeats": 4,
+          "chord": "G",
+          "lyrics": ""
+        },
+        {
+          "beat": 52,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "Как будто дом наш залило водой"
+        },
+        {
+          "beat": 56,
+          "durationBeats": 4,
+          "chord": "Em",
+          "lyrics": ""
+        },
+        {
+          "beat": 60,
+          "durationBeats": 4,
+          "chord": "Bm",
+          "lyrics": "И что в живых остались только мы с тобой."
+        },
+        {
+          "beat": 64,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "И что над нами километры воды,"
+        },
+        {
+          "beat": 68,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": ""
+        },
+        {
+          "beat": 72,
+          "durationBeats": 4,
+          "chord": "Bm",
+          "lyrics": ""
+        },
+        {
+          "beat": 76,
+          "durationBeats": 4,
+          "chord": "F#",
+          "lyrics": "И что над нами бьют хвостами киты,"
+        },
+        {
+          "beat": 80,
+          "durationBeats": 4,
+          "chord": "G",
+          "lyrics": ""
+        },
+        {
+          "beat": 84,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "И кислорода не хватит на двоих."
+        },
+        {
+          "beat": 88,
+          "durationBeats": 4,
+          "chord": "Em",
+          "lyrics": ""
+        },
+        {
+          "beat": 92,
+          "durationBeats": 4,
+          "chord": "Bm",
+          "lyrics": "Я лежу в темноте."
+        }
+      ]
+    },
+    {
+      "id": "chorus1",
+      "name": "Chorus 1",
+      "events": [
+        {
+          "beat": 96,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "Слушая наше дыхание,"
+        },
+        {
+          "beat": 100,
+          "durationBeats": 4,
+          "chord": "Bm",
+          "lyrics": "Я слушаю наше дыхание."
+        },
+        {
+          "beat": 104,
+          "durationBeats": 4,
+          "chord": "G",
+          "lyrics": ""
+        },
+        {
+          "beat": 108,
+          "durationBeats": 4,
+          "chord": "Bm",
+          "lyrics": "Я раньше и не думал, что у нас"
+        },
+        {
+          "beat": 112,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": ""
+        },
+        {
+          "beat": 116,
+          "durationBeats": 4,
+          "chord": "Bm",
+          "lyrics": "На двоих с тобой одно лишь дыхание."
+        },
+        {
+          "beat": 120,
+          "durationBeats": 4,
+          "chord": "G",
+          "lyrics": ""
+        },
+        {
+          "beat": 124,
+          "durationBeats": 4,
+          "chord": "Bm",
+          "lyrics": "Дыхание."
+        }
+      ]
+    },
+    {
+      "id": "interlude",
+      "name": "Interlude",
+      "events": [
+        {
+          "beat": 128,
+          "durationBeats": 4,
+          "chord": "Bm",
+          "lyrics": ""
+        },
+        {
+          "beat": 132,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": ""
+        },
+        {
+          "beat": 136,
+          "durationBeats": 4,
+          "chord": "Bm",
+          "lyrics": ""
+        },
+        {
+          "beat": 140,
+          "durationBeats": 4,
+          "chord": "G",
+          "lyrics": ""
+        },
+        {
+          "beat": 144,
+          "durationBeats": 4,
+          "chord": "Bm",
+          "lyrics": ""
+        },
+        {
+          "beat": 148,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": ""
+        },
+        {
+          "beat": 152,
+          "durationBeats": 4,
+          "chord": "Bm",
+          "lyrics": ""
+        },
+        {
+          "beat": 156,
+          "durationBeats": 4,
+          "chord": "G",
+          "lyrics": ""
+        }
+      ]
+    },
+    {
+      "id": "verse2",
+      "name": "Verse 2",
+      "events": [
+        {
+          "beat": 160,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "Я пытаюсь разучиться дышать,"
+        },
+        {
+          "beat": 164,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": ""
+        },
+        {
+          "beat": 168,
+          "durationBeats": 4,
+          "chord": "Bm",
+          "lyrics": ""
+        },
+        {
+          "beat": 172,
+          "durationBeats": 4,
+          "chord": "F#",
+          "lyrics": "Чтоб тебе хоть на минуту отдать"
+        },
+        {
+          "beat": 176,
+          "durationBeats": 4,
+          "chord": "G",
+          "lyrics": ""
+        },
+        {
+          "beat": 180,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "Того газа, что не умели ценить."
+        },
+        {
+          "beat": 184,
+          "durationBeats": 4,
+          "chord": "Em",
+          "lyrics": ""
+        },
+        {
+          "beat": 188,
+          "durationBeats": 4,
+          "chord": "Bm",
+          "lyrics": "Но ты спишь и не знаешь…"
+        },
+        {
+          "beat": 192,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "Что над нами километры воды"
+        },
+        {
+          "beat": 196,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": ""
+        },
+        {
+          "beat": 200,
+          "durationBeats": 4,
+          "chord": "Bm",
+          "lyrics": ""
+        },
+        {
+          "beat": 204,
+          "durationBeats": 4,
+          "chord": "F#",
+          "lyrics": "И что над нами бьют хвостами киты,"
+        },
+        {
+          "beat": 208,
+          "durationBeats": 4,
+          "chord": "G",
+          "lyrics": ""
+        },
+        {
+          "beat": 212,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "И кислорода не хватит на двоих."
+        },
+        {
+          "beat": 216,
+          "durationBeats": 4,
+          "chord": "Em",
+          "lyrics": ""
+        },
+        {
+          "beat": 220,
+          "durationBeats": 4,
+          "chord": "Bm",
+          "lyrics": "Я лежу в темноте."
+        }
+      ]
+    },
+    {
+      "id": "chorus2",
+      "name": "Chorus 2",
+      "events": [
+        {
+          "beat": 224,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "Слушая наше дыхание,"
+        },
+        {
+          "beat": 228,
+          "durationBeats": 4,
+          "chord": "Bm",
+          "lyrics": "Я слушаю наше дыхание."
+        },
+        {
+          "beat": 232,
+          "durationBeats": 4,
+          "chord": "G",
+          "lyrics": ""
+        },
+        {
+          "beat": 236,
+          "durationBeats": 4,
+          "chord": "Bm",
+          "lyrics": "Я раньше и не думал, что у нас"
+        },
+        {
+          "beat": 240,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": ""
+        },
+        {
+          "beat": 244,
+          "durationBeats": 4,
+          "chord": "Bm",
+          "lyrics": "На двоих с тобой одно лишь дыхание."
+        },
+        {
+          "beat": 248,
+          "durationBeats": 4,
+          "chord": "G",
+          "lyrics": ""
+        },
+        {
+          "beat": 252,
+          "durationBeats": 4,
+          "chord": "Bm",
+          "lyrics": "Дыхание."
+        }
+      ]
+    },
+    {
+      "id": "chorus3",
+      "name": "Chorus 3",
+      "events": [
+        {
+          "beat": 256,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "Слушая наше дыхание,"
+        },
+        {
+          "beat": 260,
+          "durationBeats": 4,
+          "chord": "Bm",
+          "lyrics": "Я слушаю наше дыхание."
+        },
+        {
+          "beat": 264,
+          "durationBeats": 4,
+          "chord": "G",
+          "lyrics": ""
+        },
+        {
+          "beat": 268,
+          "durationBeats": 4,
+          "chord": "Bm",
+          "lyrics": "Я раньше и не думал, что у нас"
+        },
+        {
+          "beat": 272,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": ""
+        },
+        {
+          "beat": 276,
+          "durationBeats": 4,
+          "chord": "Bm",
+          "lyrics": "На двоих с тобой одно лишь дыхание."
+        },
+        {
+          "beat": 280,
+          "durationBeats": 4,
+          "chord": "G",
+          "lyrics": ""
+        },
+        {
+          "beat": 284,
+          "durationBeats": 4,
+          "chord": "Bm",
+          "lyrics": "Дыхание."
+        }
+      ]
+    },
+    {
+      "id": "chorus4",
+      "name": "Chorus 4",
+      "events": [
+        {
+          "beat": 288,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "Слушая наше дыхание,"
+        },
+        {
+          "beat": 292,
+          "durationBeats": 4,
+          "chord": "Bm",
+          "lyrics": "Я слушаю наше дыхание."
+        },
+        {
+          "beat": 296,
+          "durationBeats": 4,
+          "chord": "G",
+          "lyrics": ""
+        },
+        {
+          "beat": 300,
+          "durationBeats": 4,
+          "chord": "Bm",
+          "lyrics": "Я раньше и не думал, что у нас"
+        },
+        {
+          "beat": 304,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": ""
+        },
+        {
+          "beat": 308,
+          "durationBeats": 4,
+          "chord": "Bm",
+          "lyrics": "На двоих с тобой одно лишь дыхание."
+        },
+        {
+          "beat": 312,
+          "durationBeats": 4,
+          "chord": "G",
+          "lyrics": ""
+        },
+        {
+          "beat": 316,
+          "durationBeats": 4,
+          "chord": "Bm",
+          "lyrics": "Дыхание."
+        }
+      ]
+    },
+    {
+      "id": "chorus5",
+      "name": "Chorus 5",
+      "events": [
+        {
+          "beat": 320,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "Слушая наше дыхание,"
+        },
+        {
+          "beat": 324,
+          "durationBeats": 4,
+          "chord": "Bm",
+          "lyrics": "Я слушаю наше дыхание."
+        },
+        {
+          "beat": 328,
+          "durationBeats": 4,
+          "chord": "G",
+          "lyrics": ""
+        },
+        {
+          "beat": 332,
+          "durationBeats": 4,
+          "chord": "Bm",
+          "lyrics": "Я раньше и не думал, что у нас"
+        },
+        {
+          "beat": 336,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": ""
+        },
+        {
+          "beat": 340,
+          "durationBeats": 4,
+          "chord": "Bm",
+          "lyrics": "На двоих с тобой одно лишь дыхание."
+        },
+        {
+          "beat": 344,
+          "durationBeats": 4,
+          "chord": "G",
+          "lyrics": ""
+        },
+        {
+          "beat": 348,
+          "durationBeats": 4,
+          "chord": "Bm",
+          "lyrics": "Дыхание."
+        }
+      ]
+    }
+  ],
+  "accompaniment": {
+    "style": "metronome_and_pad",
+    "volume": 0.7
+  }
+}

@@ -1,0 +1,32 @@
+{title: Дыхание}
+{artist: Наутилус Помпилиус}
+{key: Bm}
+{tempo: 76}
+{time: 4/4}
+{duration: 4}
+{comment: Source structure: https://akkords.pro/songs/nautilus-pompilius/dyhanie/}
+{comment: Бой: ↓↓↑↑↓↑}
+
+{start_of_intro}
+[Bm] [A] [Bm] [G]
+[Bm] [A] [Bm] [G]
+{end_of_intro}
+
+{start_of_verse}
+[D]Я просыпаюсь в холодном поту, [A] [Bm]
+[F#]Я просыпаюсь в кошмарном бреду, [G]
+[D]Как будто дом наш залило водой [Em]
+[Bm]И что в живых остались только мы с тобой.
+[D]И что над нами километры воды, [A] [Bm]
+[F#]И что над нами бьют хвостами киты, [G]
+[D]И кислорода не хватит на двоих. [Em]
+[Bm]Я лежу в темноте.
+{end_of_verse}
+
+{start_of_chorus}
+[A]Слушая наше дыхание,
+[Bm]Я слушаю наше дыхание. [G]
+[Bm]Я раньше и не думал, что у нас [A]
+[Bm]На двоих с тобой одно лишь дыхание. [G]
+[Bm]Дыхание.
+{end_of_chorus}
