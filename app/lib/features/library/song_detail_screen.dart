@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../domain/song.dart';
 import 'library_providers.dart';
@@ -70,15 +71,9 @@ class _SongDetailBody extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           FilledButton.icon(
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Play mode comes in Phase 1'),
-                ),
-              );
-            },
+            onPressed: () => context.push('/song/${song.id}/play'),
             icon: const Icon(Icons.play_arrow),
-            label: const Text('Play (soon)'),
+            label: const Text('Play'),
           ),
           const SizedBox(height: 32),
           Text('Chords & lyrics', style: theme.textTheme.titleLarge),

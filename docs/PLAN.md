@@ -266,7 +266,7 @@ guitar/
 
 ## Фазы
 
-### Phase 0 — Foundation (macOS) ← **сейчас**
+### Phase 0 — Foundation (macOS)
 
 - [x] Docs: `PLAN.md`, `SONG_FORMAT.md`, `README.md`
 - [x] Flutter app, **macos** platform
@@ -276,14 +276,16 @@ guitar/
 
 **Exit:** `flutter run -d macos` → список песен → detail.
 
-### Phase 1 — Play-along
+### Phase 1 — Play-along ← **сейчас**
 
-- [ ] Beat/audio clock, play/pause
-- [ ] Chord scroller + lyrics sync
-- [ ] Accompaniment: **prefer audio file**; else metronome (+ simple pad if easy)
-- [ ] End screen (no score yet)
+- [x] Beat/audio clock, play/pause
+- [x] Chord scroller + lyrics sync
+- [x] Accompaniment: **prefer audio file**; else metronome (+ simple pad if easy)
+- [x] End screen (no score yet)
 
 **Exit:** demo song play-along offline on Mac.
+
+Notes: metronome clicks via `just_audio` + bundled WAV assets; simple pad deferred. Backing-audio path implemented (no bundled track yet — all demos use metronome).
 
 ### Phase 2 — Import files (no editor)
 
