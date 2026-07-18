@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../domain/play_session.dart';
 import '../library/library_providers.dart';
 import '../scoring/widgets/live_feedback_badge.dart';
+import '../settings/settings_providers.dart';
 import 'play_session_controller.dart';
 import 'widgets/chord_scroller.dart';
 import 'widgets/countdown_overlay.dart';
@@ -26,6 +27,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
   Widget build(BuildContext context) {
     final session = ref.watch(playSessionProvider(widget.songId));
     final songAsync = ref.watch(songByIdProvider(widget.songId));
+    final metronomeVolume = ref.watch(metronomeVolumeProvider);
 
     // Navigate when finished.
     ref.listen(playSessionProvider(widget.songId), (prev, next) {
@@ -68,6 +70,10 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
         final error = session?.error;
         final scoringError = session?.scoringError;
         final scoringActive = session?.scoringActive ?? false;
+        final effectiveTempo =
+            session?.effectiveTempoBpm ?? song.tempoBpm;
+        final controller =
+            ref.read(playSessionProvider(widget.songId).notifier);
 
         return Scaffold(
           appBar: AppBar(
@@ -77,7 +83,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                 padding: const EdgeInsets.only(right: 12),
                 child: Center(
                   child: Text(
-                    '${song.tempoBpm.round()} BPM',
+                    '${effectiveTempo.round()} BPM',
                     style: theme.textTheme.labelLarge,
                   ),
                 ),
@@ -122,6 +128,11 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                         child: ChordScroller(
                           events: song.allEvents,
                           currentBeat: snapshot.currentBeat,
+                          totalBeats: song.totalBeats,
+                          onSeek: snapshot.status == PlayStatus.finished ||
+                                  snapshot.status == PlayStatus.idle
+                              ? null
+                              : controller.seekToBeat,
                         ),
                       ),
                       if (scoringActive) ...[
@@ -153,20 +164,23 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                       PlayTransport(
                         song: song,
                         snapshot: snapshot,
-                        onPause: () => ref
-                            .read(playSessionProvider(widget.songId).notifier)
-                            .pause(),
-                        onResume: () => ref
-                            .read(playSessionProvider(widget.songId).notifier)
-                            .resume(),
+                        effectiveTempoBpm: effectiveTempo,
+                        metronomeVolume: metronomeVolume,
+                        onPause: controller.pause,
+                        onResume: controller.resume,
                         onRestart: () {
                           _navigatedToComplete = false;
-                          ref
-                              .read(
-                                playSessionProvider(widget.songId).notifier,
-                              )
-                              .restart();
+                          controller.restart();
                         },
+                        onSeek: controller.seekToBeat,
+                        onNudgeTempo: controller.nudgeTempo,
+                        onResetTempo: controller.resetTempo,
+                        onMetronomeVolume: (v) => ref
+                            .read(metronomeVolumeProvider.notifier)
+                            .setVolume(v),
+                        onToggleMetronomeMute: () => ref
+                            .read(metronomeVolumeProvider.notifier)
+                            .toggleMute(),
                       ),
                     ],
                   ),

@@ -21,13 +21,22 @@ class MetronomePlayer {
   int _beatsPerBar = 4;
   int? _lastClickedBeat;
 
-  Future<void> prepare(Song song) async {
+  /// Current click gain 0–1. Zero skips playback (fully off).
+  double get volume => _volume;
+
+  bool get isAudible => _enabled && _volume > 0;
+
+  Future<void> prepare(
+    Song song, {
+    double? volume,
+  }) async {
     _beatsPerBar = song.timeSignature.isNotEmpty ? song.timeSignature[0] : 4;
     if (_beatsPerBar <= 0) _beatsPerBar = 4;
 
     final style = song.accompaniment.style;
     _enabled = style != 'none';
-    _volume = song.accompaniment.volume.clamp(0.0, 1.0);
+    // Prefer explicit user volume; fall back to song accompaniment default.
+    _volume = (volume ?? song.accompaniment.volume).clamp(0.0, 1.0);
 
     if (!_enabled) {
       _prepared = true;
@@ -38,19 +47,32 @@ class MetronomePlayer {
       _click.setAsset(clickAsset),
       _accent.setAsset(accentAsset),
     ]);
-    await Future.wait([
-      _click.setVolume(_volume * 0.75),
-      _accent.setVolume(_volume),
-    ]);
+    await _applyVolume();
     _prepared = true;
     _lastClickedBeat = null;
+  }
+
+  /// Live volume change (0 = fully mute, no click scheduling work beyond skip).
+  Future<void> setVolume(double volume) async {
+    _volume = volume.clamp(0.0, 1.0);
+    if (!_prepared || !_enabled) return;
+    await _applyVolume();
+  }
+
+  Future<void> _applyVolume() async {
+    try {
+      await Future.wait([
+        _click.setVolume(_volume * 0.75),
+        _accent.setVolume(_volume),
+      ]);
+    } catch (_) {}
   }
 
   /// Call on every clock tick. Fires at most once per integer beat.
   ///
   /// Clicks during count-in (`beat < 0`) and while playing.
   Future<void> onBeat(double beat) async {
-    if (!_prepared || !_enabled) return;
+    if (!_prepared || !_enabled || _volume <= 0) return;
 
     // Floor toward -inf so -0.1 → -1, 0.0 → 0, 3.9 → 3
     final integerBeat = beat.floor();

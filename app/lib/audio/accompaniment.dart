@@ -23,17 +23,23 @@ class Accompaniment {
 
   BackingAudioPlayer get backing => _backing;
 
-  Future<void> prepare(Song song) async {
+  Future<void> prepare(Song song, {double? metronomeVolume}) async {
     _useAudio = song.hasAudio;
     _musicPlaying = false;
 
     // Metronome for count-in (and full session when no audio).
-    await _metronome.prepare(song);
+    await _metronome.prepare(song, volume: metronomeVolume);
 
     if (_useAudio) {
       await _backing.prepare(song);
     }
   }
+
+  /// Live metronome gain 0–1 (0 = fully off).
+  Future<void> setMetronomeVolume(double volume) =>
+      _metronome.setVolume(volume);
+
+  double get metronomeVolume => _metronome.volume;
 
   /// Called every clock tick with the current song beat (may be negative).
   Future<void> onBeat(double beat) async {
@@ -48,6 +54,48 @@ class Accompaniment {
       _musicPlaying = true;
       await _backing.startAtBeat(beat);
     }
+  }
+
+  /// Seek accompaniment to [beat]. Starts music if scrubbing past count-in
+  /// onto a backing track. Respects [playing] (pause after seek if false).
+  Future<void> seekToBeat(double beat, {required bool playing}) async {
+    _metronome.reset();
+    if (!_useAudio) return;
+
+    if (beat < 0) {
+      // Still in count-in: stop any started track.
+      if (_musicPlaying) {
+        await _backing.stop();
+        _musicPlaying = false;
+      }
+      return;
+    }
+
+    if (!_musicPlaying) {
+      if (playing) {
+        _musicPlaying = true;
+        await _backing.startAtBeat(beat);
+      } else {
+        // Prepare position while paused; play on resume.
+        _musicPlaying = true;
+        await _backing.seekToBeat(beat);
+        await _backing.pause();
+      }
+      return;
+    }
+
+    await _backing.seekToBeat(beat);
+    if (playing) {
+      await _backing.resume();
+    } else {
+      await _backing.pause();
+    }
+  }
+
+  /// Rate for backing audio (1.0 = song tempo). No-op without audio master.
+  Future<void> setPlaybackRate(double rate) async {
+    if (!_useAudio) return;
+    await _backing.setPlaybackRate(rate);
   }
 
   Future<void> pause() async {

@@ -15,6 +15,56 @@ const _recognitionModeKey = 'recognitionMode';
 const _calibrationKey = 'calibration.v1';
 const _thresholdPrefsKey = 'thresholdPrefs.v1';
 const _chordVocabularyKey = 'chordVocabulary.v1';
+const _metronomeVolumeKey = 'metronomeVolume';
+
+/// Default metronome gain (matches song accompaniment default).
+const double defaultMetronomeVolume = 0.7;
+
+/// Metronome click volume 0–1 (persisted). 0 = fully off.
+class MetronomeVolumeNotifier extends Notifier<double> {
+  /// Last non-zero volume for mute toggle restore.
+  double _lastAudible = defaultMetronomeVolume;
+
+  @override
+  double build() {
+    Future.microtask(_load);
+    return defaultMetronomeVolume;
+  }
+
+  Future<void> _load() async {
+    final prefs = await SharedPreferences.getInstance();
+    final v = prefs.getDouble(_metronomeVolumeKey);
+    if (v == null) {
+      state = defaultMetronomeVolume;
+      return;
+    }
+    state = v.clamp(0.0, 1.0);
+    if (state > 0) _lastAudible = state;
+  }
+
+  Future<void> setVolume(double value) async {
+    final v = value.clamp(0.0, 1.0);
+    state = v;
+    if (v > 0) _lastAudible = v;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble(_metronomeVolumeKey, v);
+  }
+
+  /// Toggle between 0 and the last audible level.
+  Future<void> toggleMute() async {
+    if (state > 0) {
+      _lastAudible = state;
+      await setVolume(0);
+    } else {
+      await setVolume(_lastAudible > 0 ? _lastAudible : defaultMetronomeVolume);
+    }
+  }
+}
+
+final metronomeVolumeProvider =
+    NotifierProvider<MetronomeVolumeNotifier, double>(
+  MetronomeVolumeNotifier.new,
+);
 
 /// Whether mic scoring is enabled (persisted). Default: true.
 class ScoringEnabledNotifier extends Notifier<bool> {

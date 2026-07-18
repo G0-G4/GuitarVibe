@@ -319,6 +319,13 @@ Notes: `record` PCM16 stream + `pitch_detector_dart` (YIN); match = pitch class 
 
 **Exit:** open Mic Lab → play Am/C/G → correct guess most of the time; mode switch affects scoring.
 
+### Phase 3.2 — Practice transport (tempo + scrub)
+
+- [x] Practice tempo override (±5 / ±10 BPM, clamp 40–240, reset to song)
+- [x] Scrub seek on progress slider (reopen score windows for retry/skip)
+- [x] BeatClock.setTempoBpm re-anchors without jump; audio path uses setSpeed
+- [x] Metronome volume 0–100% (persisted; 0 = fully off; player + settings)
+
 ### Phase 4 — Polish + more platforms + audio helpers
 
 - [ ] Enable android/ios/windows targets

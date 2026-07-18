@@ -5,34 +5,81 @@ import '../../../domain/song.dart';
 /// Horizontal chord timeline with a fixed playhead.
 ///
 /// Position: `x = playheadX + (event.beat - currentBeat) * pxPerBeat`.
-class ChordScroller extends StatelessWidget {
+///
+/// When [onSeek] is set, the user can scrub:
+/// - **Drag** horizontally (timeline follows the finger; drag right → earlier).
+/// - **Tap** to bring the beat under the finger to the playhead.
+class ChordScroller extends StatefulWidget {
   const ChordScroller({
     super.key,
     required this.events,
     required this.currentBeat,
+    this.totalBeats = 0,
+    this.onSeek,
     this.pxPerBeat = 100,
     this.playheadFraction = 0.28,
   });
 
   final List<ChordEvent> events;
   final double currentBeat;
+
+  /// Song length in beats; used to clamp scrub targets.
+  final double totalBeats;
+
+  /// When non-null, drag/tap seek is enabled.
+  final ValueChanged<double>? onSeek;
+
   final double pxPerBeat;
 
   /// Playhead X as a fraction of width (0–1).
   final double playheadFraction;
 
   @override
+  State<ChordScroller> createState() => _ChordScrollerState();
+}
+
+class _ChordScrollerState extends State<ChordScroller> {
+  /// Preview beat while dragging (null when not scrubbing).
+  double? _previewBeat;
+
+  double? _dragStartBeat;
+  double? _dragStartX;
+  bool _didDrag = false;
+
+  double get _displayBeat => _previewBeat ?? widget.currentBeat;
+
+  double get _maxBeat {
+    final t = widget.totalBeats;
+    if (t > 0) return t;
+    if (widget.events.isEmpty) return 0;
+    return widget.events
+        .map((e) => e.endBeat)
+        .reduce((a, b) => a > b ? a : b);
+  }
+
+  double _clampBeat(double beat) =>
+      beat.clamp(0.0, _maxBeat > 0 ? _maxBeat : 0.0).toDouble();
+
+  void _commitSeek(double beat) {
+    final onSeek = widget.onSeek;
+    if (onSeek == null) return;
+    onSeek(_clampBeat(beat));
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final canSeek = widget.onSeek != null;
 
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
         final height = constraints.maxHeight;
-        final playheadX = width * playheadFraction;
+        final playheadX = width * widget.playheadFraction;
+        final displayBeat = _displayBeat;
 
-        return ClipRect(
+        Widget lane = ClipRect(
           child: Stack(
             children: [
               // Lane background
@@ -45,12 +92,12 @@ class ChordScroller extends StatelessWidget {
                 ),
               ),
               // Chord cards
-              for (final event in events)
+              for (final event in widget.events)
                 _ChordCard(
                   event: event,
-                  currentBeat: currentBeat,
+                  currentBeat: displayBeat,
                   playheadX: playheadX,
-                  pxPerBeat: pxPerBeat,
+                  pxPerBeat: widget.pxPerBeat,
                   height: height,
                 ),
               // Playhead
@@ -73,6 +120,63 @@ class ChordScroller extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+        );
+
+        if (!canSeek) return lane;
+
+        return MouseRegion(
+          cursor: SystemMouseCursors.resizeLeftRight,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTapUp: (details) {
+              // Absolute: beat under the tap moves to the playhead.
+              final x = details.localPosition.dx;
+              final target =
+                  displayBeat + (x - playheadX) / widget.pxPerBeat;
+              _commitSeek(target);
+            },
+            onPanStart: (details) {
+              _didDrag = false;
+              _dragStartBeat = displayBeat;
+              _dragStartX = details.localPosition.dx;
+              setState(() => _previewBeat = displayBeat);
+            },
+            onPanUpdate: (details) {
+              final startBeat = _dragStartBeat;
+              final startX = _dragStartX;
+              if (startBeat == null || startX == null) return;
+
+              final dx = details.localPosition.dx - startX;
+              if (dx.abs() > 2) _didDrag = true;
+
+              // Drag content right → earlier in the song.
+              final next = _clampBeat(startBeat - dx / widget.pxPerBeat);
+              setState(() => _previewBeat = next);
+            },
+            onPanEnd: (_) {
+              final preview = _previewBeat;
+              final dragged = _didDrag;
+              setState(() {
+                _previewBeat = null;
+                _dragStartBeat = null;
+                _dragStartX = null;
+                _didDrag = false;
+              });
+              // Commit drag seeks only; pure taps use onTapUp (absolute).
+              if (preview != null && dragged) {
+                _commitSeek(preview);
+              }
+            },
+            onPanCancel: () {
+              setState(() {
+                _previewBeat = null;
+                _dragStartBeat = null;
+                _dragStartX = null;
+                _didDrag = false;
+              });
+            },
+            child: lane,
           ),
         );
       },

@@ -23,6 +23,28 @@ double beatsToSeconds(double beats, double tempoBpm) {
   return beats * 60.0 / tempoBpm;
 }
 
+/// Practice tempo limits (BPM).
+const double minPracticeTempoBpm = 40;
+const double maxPracticeTempoBpm = 240;
+
+/// Clamp a practice tempo override into a safe range.
+double clampTempoBpm(double bpm) =>
+    bpm.clamp(minPracticeTempoBpm, maxPracticeTempoBpm).toDouble();
+
+/// just_audio playback-rate limits for backing tracks.
+const double minPlaybackRate = 0.25;
+const double maxPlaybackRate = 2.0;
+
+/// Playback rate from effective practice BPM vs authored song tempo.
+double playbackRateFor({
+  required double effectiveTempoBpm,
+  required double songTempoBpm,
+}) {
+  if (songTempoBpm <= 0) return 1.0;
+  final rate = effectiveTempoBpm / songTempoBpm;
+  return rate.clamp(minPlaybackRate, maxPlaybackRate).toDouble();
+}
+
 /// Default count-in length: one bar in the song's time signature.
 int countInBeatsFor(Song song) {
   if (song.timeSignature.isEmpty) return 4;

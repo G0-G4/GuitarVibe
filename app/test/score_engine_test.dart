@@ -233,5 +233,45 @@ void main() {
       engine.onBeat(0.75 + ScoreEngine.lastGradeHoldBeats + 0.01);
       expect(engine.lastGrade, isNull);
     });
+
+    test('reopenFromBeat forward marks skipped as miss', () {
+      final engine = ScoreEngine(_events([(0, 'C'), (4, 'G'), (8, 'Am')]));
+      engine.reopenFromBeat(8);
+      expect(engine.summary.miss, 2);
+      expect(engine.summary.hits, 0);
+      expect(engine.isComplete, isFalse);
+      // First open target is Am @ 8; A is a chord tone of Am.
+      _hit(engine, hz: aHz, beat: 8.0);
+      expect(engine.summary.miss, 2);
+      expect(engine.summary.hits, 1);
+    });
+
+    test('reopenFromBeat backward clears grades for retry', () {
+      final engine = ScoreEngine(_events([(0, 'C'), (4, 'G')]));
+      _hit(engine, hz: cHz, beat: 0.0);
+      expect(engine.summary.good, 1);
+
+      engine.reopenFromBeat(0);
+      expect(engine.summary.good, 0);
+      expect(engine.summary.miss, 0);
+      expect(engine.lastGrade, isNull);
+
+      // Can score C again.
+      _hit(engine, hz: cHz, beat: 0.0);
+      expect(engine.summary.good, 1);
+    });
+
+    test('reopenFromBeat keeps earlier grades when seeking mid-song', () {
+      final engine = ScoreEngine(_events([(0, 'C'), (4, 'G'), (8, 'Am')]));
+      _hit(engine, hz: cHz, beat: 0.0);
+      expect(engine.summary.good, 1);
+
+      engine.reopenFromBeat(4);
+      expect(engine.summary.good, 1);
+      expect(engine.summary.miss, 0);
+      // G is open again (cleared if it had been graded; was not).
+      _hit(engine, hz: gHz, beat: 4.0);
+      expect(engine.summary.good, 2);
+    });
   });
 }

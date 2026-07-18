@@ -39,6 +39,27 @@ void main() {
     });
   });
 
+  group('clampTempoBpm / playbackRateFor', () {
+    test('clamps to practice range', () {
+      expect(clampTempoBpm(10), minPracticeTempoBpm);
+      expect(clampTempoBpm(400), maxPracticeTempoBpm);
+      expect(clampTempoBpm(90), 90);
+    });
+
+    test('playback rate is effective / song', () {
+      expect(playbackRateFor(effectiveTempoBpm: 60, songTempoBpm: 120), 0.5);
+      expect(playbackRateFor(effectiveTempoBpm: 120, songTempoBpm: 120), 1.0);
+      expect(playbackRateFor(effectiveTempoBpm: 180, songTempoBpm: 90), 2.0);
+    });
+
+    test('playback rate clamps extremes', () {
+      expect(
+        playbackRateFor(effectiveTempoBpm: 40, songTempoBpm: 240),
+        minPlaybackRate,
+      );
+    });
+  });
+
   group('eventIndexAt', () {
     final events = [
       const ChordEvent(beat: 0, durationBeats: 4, chord: 'C'),

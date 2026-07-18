@@ -45,4 +45,28 @@ void main() {
     expect(clock.currentBeat, closeTo(8, 0.05));
     clock.dispose();
   });
+
+  test('setTempoBpm keeps beat stable then advances at new rate', () async {
+    final clock = BeatClock(
+      tempoBpm: 60, // 1 beat/sec
+      tickInterval: const Duration(milliseconds: 20),
+    );
+    clock.start(startBeat: 0);
+    await Future<void>.delayed(const Duration(milliseconds: 200));
+    clock.pause();
+
+    final before = clock.currentBeat;
+    expect(before, greaterThan(0.1));
+
+    clock.setTempoBpm(120); // 2 beats/sec
+    expect(clock.currentBeat, closeTo(before, 0.05));
+
+    clock.resume();
+    await Future<void>.delayed(const Duration(milliseconds: 200));
+    // ~0.4 beats in 0.2s at 120 bpm
+    expect(clock.currentBeat, greaterThan(before + 0.25));
+    expect(clock.currentBeat, lessThan(before + 0.7));
+
+    clock.dispose();
+  });
 }

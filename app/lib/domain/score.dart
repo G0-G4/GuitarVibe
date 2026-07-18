@@ -436,4 +436,78 @@ class ScoreEngine {
     _maxStreak = 0;
     _recognizer.reset();
   }
+
+  /// Adjust open windows after a scrub seek to [beat].
+  ///
+  /// - Targets with [EventScore.idealBeat] ≥ [beat]: cleared (retry).
+  /// - Earlier ungraded targets whose late window is fully past: miss.
+  /// - Earlier graded targets: kept.
+  /// Then rebuilds counters and [open] index.
+  void reopenFromBeat(double beat) {
+    for (var i = 0; i < _targets.length; i++) {
+      final t = _targets[i];
+      if (t.idealBeat >= beat) {
+        // Retry zone from seek position onward.
+        _targets[i] = EventScore(
+          eventIndex: t.eventIndex,
+          chord: t.chord,
+          idealBeat: t.idealBeat,
+        );
+      } else if (!t.isGraded) {
+        final lateEdge = t.idealBeat + windows.lateEnd;
+        if (beat > lateEdge) {
+          // Skipped past without a grade — count as miss.
+          _targets[i] = t.copyWith(grade: HitGrade.miss);
+        }
+        // else: still inside / before late window while seek is after ideal —
+        // leave ungraded so user can still hit (e.g. seeked into late zone).
+      }
+    }
+
+    _recountFromTargets();
+    _openIndex = 0;
+    while (_openIndex < _targets.length && _targets[_openIndex].isGraded) {
+      _openIndex++;
+    }
+
+    lastGrade = null;
+    _lastGradeAtBeat = null;
+    _lastGradedTargetIndex = null;
+    _awaitingMatchGap = false;
+    _resetMatchStreak();
+    _recognizer.reset();
+  }
+
+  void _recountFromTargets() {
+    _good = 0;
+    _early = 0;
+    _late = 0;
+    _miss = 0;
+    _currentStreak = 0;
+    _maxStreak = 0;
+    for (final t in _targets) {
+      final g = t.grade;
+      if (g == null) {
+        _currentStreak = 0;
+        continue;
+      }
+      switch (g) {
+        case HitGrade.good:
+          _good++;
+          _currentStreak++;
+        case HitGrade.early:
+          _early++;
+          _currentStreak++;
+        case HitGrade.late:
+          _late++;
+          _currentStreak++;
+        case HitGrade.miss:
+          _miss++;
+          _currentStreak = 0;
+      }
+      if (_currentStreak > _maxStreak) {
+        _maxStreak = _currentStreak;
+      }
+    }
+  }
 }

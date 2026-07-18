@@ -17,6 +17,7 @@ class PlaySessionState {
   const PlaySessionState({
     required this.song,
     required this.snapshot,
+    required this.effectiveTempoBpm,
     this.error,
     this.lastHit,
     this.lastHitEpoch = 0,
@@ -27,6 +28,10 @@ class PlaySessionState {
 
   final Song song;
   final PlaySessionSnapshot snapshot;
+
+  /// Practice tempo (BPM). Defaults to [Song.tempoBpm]; user can override.
+  final double effectiveTempoBpm;
+
   final String? error;
 
   /// Latest hit grade for live badge.
@@ -44,9 +49,13 @@ class PlaySessionState {
   /// Mic/permission issue (session still plays).
   final String? scoringError;
 
+  bool get isTempoOverridden =>
+      (effectiveTempoBpm - song.tempoBpm).abs() > 0.01;
+
   PlaySessionState copyWith({
     Song? song,
     PlaySessionSnapshot? snapshot,
+    double? effectiveTempoBpm,
     String? error,
     bool clearError = false,
     HitGrade? lastHit,
@@ -60,6 +69,7 @@ class PlaySessionState {
     return PlaySessionState(
       song: song ?? this.song,
       snapshot: snapshot ?? this.snapshot,
+      effectiveTempoBpm: effectiveTempoBpm ?? this.effectiveTempoBpm,
       error: clearError ? null : (error ?? this.error),
       lastHit: clearLastHit ? null : (lastHit ?? this.lastHit),
       lastHitEpoch: lastHitEpoch ?? this.lastHitEpoch,
@@ -93,6 +103,12 @@ class PlaySessionController extends Notifier<PlaySessionState?> {
       _disposeResources();
     });
 
+    // Live metronome volume from settings (also controllable mid-session).
+    ref.listen<double>(metronomeVolumeProvider, (prev, next) {
+      final acc = _accompaniment;
+      if (acc != null) unawaited(acc.setMetronomeVolume(next));
+    });
+
     // Load song asynchronously; auto-start count-in when ready.
     Future.microtask(_bootstrap);
     return null;
@@ -105,6 +121,7 @@ class PlaySessionController extends Notifier<PlaySessionState?> {
       final countIn = countInBeatsFor(song);
       state = PlaySessionState(
         song: song,
+        effectiveTempoBpm: song.tempoBpm,
         snapshot: PlaySessionSnapshot(
           status: PlayStatus.idle,
           currentBeat: -countIn.toDouble(),
@@ -128,6 +145,7 @@ class PlaySessionController extends Notifier<PlaySessionState?> {
     _finishing = false;
 
     final song = current.song;
+    final effectiveTempo = clampTempoBpm(current.effectiveTempoBpm);
     final countIn = countInBeatsFor(song);
     final scoringWanted = ref.read(scoringEnabledProvider);
     final mode = ref.read(recognitionModeProvider);
@@ -135,17 +153,30 @@ class PlaySessionController extends Notifier<PlaySessionState?> {
     final config = ref.read(effectiveRecognitionConfigProvider);
 
     try {
+      final metronomeVolume = ref.read(metronomeVolumeProvider);
       final accompaniment = Accompaniment();
-      await accompaniment.prepare(song);
+      await accompaniment.prepare(song, metronomeVolume: metronomeVolume);
       if (_disposed) {
         await accompaniment.dispose();
         return;
       }
 
-      final clock = BeatClock(tempoBpm: song.tempoBpm);
+      // Metronome path: clock runs at effective tempo.
+      // Audio master: clock.tempoBpm stays song tempo (position→beat);
+      // practice speed is applied via setPlaybackRate.
+      final clockTempo = song.hasAudio ? song.tempoBpm : effectiveTempo;
+      final clock = BeatClock(tempoBpm: clockTempo);
       clock.onTick = _onTick;
       _clock = clock;
       _accompaniment = accompaniment;
+
+      if (song.hasAudio) {
+        final rate = playbackRateFor(
+          effectiveTempoBpm: effectiveTempo,
+          songTempoBpm: song.tempoBpm,
+        );
+        await accompaniment.setPlaybackRate(rate);
+      }
 
       ScoreEngine? engine;
       String? scoringError;
@@ -177,6 +208,7 @@ class PlaySessionController extends Notifier<PlaySessionState?> {
       ref.read(lastSessionScoreProvider.notifier).clear();
 
       state = current.copyWith(
+        effectiveTempoBpm: effectiveTempo,
         snapshot: PlaySessionSnapshot(
           status: PlayStatus.countdown,
           currentBeat: -countIn.toDouble(),
@@ -335,6 +367,111 @@ class PlaySessionController extends Notifier<PlaySessionState?> {
 
   Future<void> restart() async {
     await start();
+  }
+
+  /// Set practice tempo (BPM). Keeps current beat; re-anchors the clock.
+  Future<void> setTempoBpm(double bpm) async {
+    final current = state;
+    if (current == null || _disposed) return;
+    if (current.snapshot.status == PlayStatus.finished ||
+        current.snapshot.status == PlayStatus.idle) {
+      return;
+    }
+
+    final effective = clampTempoBpm(bpm);
+    final song = current.song;
+    final clock = _clock;
+    final acc = _accompaniment;
+
+    if (song.hasAudio && acc != null) {
+      final rate = playbackRateFor(
+        effectiveTempoBpm: effective,
+        songTempoBpm: song.tempoBpm,
+      );
+      await acc.setPlaybackRate(rate);
+      // Audio master: do not change clock.tempoBpm (position→beat uses song BPM).
+    } else {
+      clock?.setTempoBpm(effective);
+    }
+
+    if (_disposed) return;
+    state = current.copyWith(effectiveTempoBpm: effective);
+  }
+
+  Future<void> nudgeTempo(double deltaBpm) async {
+    final current = state;
+    if (current == null) return;
+    await setTempoBpm(current.effectiveTempoBpm + deltaBpm);
+  }
+
+  Future<void> resetTempo() async {
+    final current = state;
+    if (current == null) return;
+    await setTempoBpm(current.song.tempoBpm);
+  }
+
+  /// Scrub to a song body beat (clamped to `[0, totalBeats]`).
+  ///
+  /// Continues playing if currently running; stays paused if paused.
+  /// Exits count-in when seeking into the song body.
+  Future<void> seekToBeat(double beat) async {
+    final current = state;
+    if (current == null || _disposed) return;
+
+    final status = current.snapshot.status;
+    if (status == PlayStatus.finished || status == PlayStatus.idle) {
+      return;
+    }
+
+    final song = current.song;
+    final total = song.totalBeats;
+    final target = beat.clamp(0.0, total > 0 ? total : 0.0).toDouble();
+    final wasPaused = status == PlayStatus.paused;
+    final playing = !wasPaused;
+
+    final clock = _clock;
+    final acc = _accompaniment;
+    if (clock == null) return;
+
+    // Start music path if scrubbing into the body during/after count-in.
+    if (target >= 0 && !_musicStarted) {
+      _musicStarted = true;
+    }
+
+    await acc?.seekToBeat(target, playing: playing);
+    if (_disposed) return;
+
+    if (acc != null && acc.usesAudioMaster && target >= 0) {
+      clock.masterPosition = () => acc.backing.position;
+    }
+
+    clock.seekBeat(target);
+    acc?.resetMetronome();
+
+    final engine = _scoreEngine;
+    if (engine != null) {
+      engine.reopenFromBeat(target);
+    }
+
+    final newStatus = wasPaused
+        ? PlayStatus.paused
+        : (target < 0 ? PlayStatus.countdown : PlayStatus.playing);
+
+    state = current.copyWith(
+      snapshot: current.snapshot.copyWith(
+        status: newStatus,
+        currentBeat: target,
+      ),
+      clearLastHit: true,
+      liveScore: engine?.summary ?? current.liveScore,
+    );
+
+    // If we were playing and not audio-master, ensure clock is running.
+    if (playing && !clock.isRunning) {
+      clock.resume();
+    } else if (wasPaused && clock.isRunning) {
+      clock.pause();
+    }
   }
 
   void _finish() {

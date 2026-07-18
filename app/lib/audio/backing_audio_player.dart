@@ -46,10 +46,26 @@ class BackingAudioPlayer {
   /// Seek to the media time that corresponds to [songBeat] and play.
   Future<void> startAtBeat(double songBeat) async {
     if (!_prepared || _song == null || _song!.audio == null) return;
-    final offset = _song!.audio!.offsetSec;
-    final sec = offset + beatsToSeconds(songBeat.clamp(0, double.infinity), _song!.tempoBpm);
-    await _player.seek(Duration(microseconds: (sec * 1e6).round()));
+    await seekToBeat(songBeat);
     await _player.play();
+  }
+
+  /// Seek without forcing play (used by scrub while paused/playing).
+  ///
+  /// Media time uses **authored** [Song.tempoBpm] (track is recorded at song tempo).
+  Future<void> seekToBeat(double songBeat) async {
+    if (!_prepared || _song == null || _song!.audio == null) return;
+    final offset = _song!.audio!.offsetSec;
+    final sec =
+        offset + beatsToSeconds(songBeat.clamp(0, double.infinity), _song!.tempoBpm);
+    await _player.seek(Duration(microseconds: (sec * 1e6).round()));
+  }
+
+  /// Practice playback rate (1.0 = song tempo). Pitch may shift with speed.
+  Future<void> setPlaybackRate(double rate) async {
+    if (!_prepared) return;
+    final r = rate.clamp(minPlaybackRate, maxPlaybackRate).toDouble();
+    await _player.setSpeed(r);
   }
 
   Future<void> pause() => _player.pause();

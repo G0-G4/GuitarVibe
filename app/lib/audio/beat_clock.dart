@@ -86,6 +86,18 @@ class BeatClock {
     onTick?.call(currentBeat);
   }
 
+  /// Change tempo without jumping [currentBeat].
+  ///
+  /// Re-anchors origin so subsequent elapsed time maps at the new rate.
+  void setTempoBpm(double bpm) {
+    if (bpm <= 0) return;
+    final beat = currentBeat;
+    tempoBpm = bpm;
+    _originBeat = beat;
+    _originElapsed = masterPosition?.call() ?? _stopwatch.elapsed;
+    onTick?.call(currentBeat);
+  }
+
   void stop() {
     _timer?.cancel();
     _timer = null;

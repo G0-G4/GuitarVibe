@@ -57,6 +57,8 @@ class SettingsScreen extends ConsumerWidget {
                 ref.read(scoringEnabledProvider.notifier).setEnabled(v),
           ),
           const Divider(height: 1),
+          _MetronomeVolumeTile(theme: theme),
+          const Divider(height: 1),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: Text(
@@ -124,13 +126,92 @@ class SettingsScreen extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
             child: Text(
-              'Play near the mic and keep speaker volume moderate so the '
-              'metronome does not drown out your guitar. Use Mic Lab to '
+              'Play near the mic and keep metronome volume moderate (or mute) '
+              'so clicks do not drown out your guitar. Use Mic Lab to '
               'calibrate room/guitar noise isolation and compare modes.',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MetronomeVolumeTile extends ConsumerWidget {
+  const _MetronomeVolumeTile({required this.theme});
+
+  final ThemeData theme;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final volume = ref.watch(metronomeVolumeProvider);
+    final muted = volume <= 0;
+    final pct = (volume * 100).round();
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Icon(
+                muted ? Icons.volume_off : Icons.music_note,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Metronome volume',
+                  style: theme.textTheme.titleMedium,
+                ),
+              ),
+              Text(
+                muted ? 'Off' : '$pct%',
+                style: theme.textTheme.labelLarge?.copyWith(
+                  color: muted
+                      ? theme.colorScheme.error
+                      : theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Click track during count-in and metronome play-along. '
+            'Drag to 0 or tap the icon to mute completely.',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          Row(
+            children: [
+              IconButton(
+                tooltip: muted ? 'Unmute' : 'Mute',
+                onPressed: () =>
+                    ref.read(metronomeVolumeProvider.notifier).toggleMute(),
+                icon: Icon(
+                  muted
+                      ? Icons.volume_off
+                      : volume < 0.35
+                          ? Icons.volume_down
+                          : Icons.volume_up,
+                ),
+              ),
+              Expanded(
+                child: Slider(
+                  min: 0,
+                  max: 1,
+                  value: volume.clamp(0.0, 1.0),
+                  onChanged: (v) => ref
+                      .read(metronomeVolumeProvider.notifier)
+                      .setVolume(v),
+                ),
+              ),
+            ],
           ),
         ],
       ),
