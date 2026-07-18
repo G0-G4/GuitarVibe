@@ -78,6 +78,16 @@ class GuessDisplay extends StatelessWidget {
             ),
           ),
         ],
+        if (guess.symbol == null && guess.blockReason != null) ...[
+          const SizedBox(height: 10),
+          Text(
+            guess.blockReason!,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: scheme.tertiary,
+            ),
+          ),
+        ],
       ],
     );
   }

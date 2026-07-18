@@ -54,7 +54,11 @@ class ChordRecognizer {
       case RecognitionMode.chroma:
         return _guessFromChroma(f, nowMs: nowMs, requireYinSupport: false);
       case RecognitionMode.hybrid:
-        return _guessFromChroma(f, nowMs: nowMs, requireYinSupport: true);
+        return _guessFromChroma(
+          f,
+          nowMs: nowMs,
+          requireYinSupport: config.requireYinForHybrid,
+        );
     }
   }
 
@@ -178,7 +182,17 @@ class ChordRecognizer {
       minConcentration: config.chromaMinConcentration,
     )) {
       _chromaHoldSymbol = null;
-      return empty;
+      final conc = chromaConcentration(f.chroma);
+      return ChordGuess(
+        rms: f.rms,
+        chroma: f.chroma,
+        yinHz: f.yinHz,
+        yinConfidence: f.yinConfidence,
+        isSilence: false,
+        blockReason:
+            'Flat spectrum (concentration ${conc.toStringAsFixed(2)} '
+            '< ${config.chromaMinConcentration.toStringAsFixed(2)})',
+      );
     }
 
     final ranked = rankChromaMatches(f.chroma, topK: 5);
@@ -195,7 +209,7 @@ class ChordRecognizer {
     ];
 
     // Hard reject weak or ambiguous frames (do not show a random "winner").
-    if (best.score < config.chromaMinScore || margin < config.chromaMargin) {
+    if (best.score < config.chromaMinScore) {
       _chromaHoldSymbol = null;
       return ChordGuess(
         confidence: best.score,
@@ -205,6 +219,27 @@ class ChordRecognizer {
         yinConfidence: f.yinConfidence,
         rms: f.rms,
         isSilence: false,
+        blockReason:
+            'Score ${best.score.toStringAsFixed(2)} < min '
+            '${config.chromaMinScore.toStringAsFixed(2)} '
+            '(top ${best.symbol})',
+      );
+    }
+    if (margin < config.chromaMargin) {
+      _chromaHoldSymbol = null;
+      final alt = ranked.length > 1 ? ranked[1].symbol : '?';
+      return ChordGuess(
+        confidence: best.score,
+        top: top,
+        chroma: f.chroma,
+        yinHz: f.yinHz,
+        yinConfidence: f.yinConfidence,
+        rms: f.rms,
+        isSilence: false,
+        blockReason:
+            'Ambiguous: ${best.symbol} vs $alt '
+            '(margin ${margin.toStringAsFixed(2)} < '
+            '${config.chromaMargin.toStringAsFixed(2)})',
       );
     }
 
@@ -222,12 +257,16 @@ class ChordRecognizer {
           yinConfidence: conf,
           rms: f.rms,
           isSilence: false,
+          blockReason:
+              'Hybrid: need clear pitch (YIN). Turn off “Require pitch” '
+              'or play a single note louder.',
         );
       }
       final pc = pitchClassFromHz(hz);
       final tones = pitchClassesForChord(best.symbol);
       if (pc == null || !tones.contains(pc)) {
         _chromaHoldSymbol = null;
+        final heard = pc != null ? pitchClassNames[pc] : '?';
         return ChordGuess(
           confidence: best.score * 0.8,
           top: top,
@@ -236,6 +275,9 @@ class ChordRecognizer {
           yinConfidence: conf,
           rms: f.rms,
           isSilence: false,
+          blockReason:
+              'Hybrid: pitch $heard not in ${best.symbol}. '
+              'Lower strictness or disable pitch lock.',
         );
       }
     }
@@ -250,6 +292,7 @@ class ChordRecognizer {
         yinConfidence: f.yinConfidence,
         rms: f.rms,
         isSilence: false,
+        blockReason: 'Holding ${best.symbol}…',
       );
     }
 

@@ -100,11 +100,19 @@ class MicLabController extends Notifier<MicLabState> {
 
     ref.listen<CalibrationBundle>(calibrationProvider, (prev, next) {
       if (_disposed) return;
-      final cfg = configFromCalibration(next);
+      final cfg = ref.read(effectiveRecognitionConfigProvider);
       _recognizer.config = cfg;
       _recognizer.reset();
       _mic?.updateNoiseProfile(next.noise?.chromaMean);
       state = state.copyWith(calibration: next, config: cfg);
+    });
+
+    ref.listen(thresholdPrefsProvider, (prev, next) {
+      if (_disposed) return;
+      final cfg = ref.read(effectiveRecognitionConfigProvider);
+      _recognizer.config = cfg;
+      _recognizer.reset();
+      state = state.copyWith(config: cfg);
     });
 
     ref.onDispose(() {

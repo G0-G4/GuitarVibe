@@ -20,6 +20,7 @@ class ChordGuess {
     this.yinConfidence,
     this.rms = 0,
     this.isSilence = true,
+    this.blockReason,
   });
 
   /// Best guess symbol, e.g. `Am`, or null if silence/unknown.
@@ -34,6 +35,9 @@ class ChordGuess {
   final double? yinConfidence;
   final double rms;
   final bool isSilence;
+
+  /// Why [symbol] is null despite having rankings (for Mic Lab debugging).
+  final String? blockReason;
 
   static const silence = ChordGuess();
 }

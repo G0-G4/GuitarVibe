@@ -4,11 +4,13 @@ import 'package:go_router/go_router.dart';
 
 import '../../domain/chord_tones.dart';
 import '../../domain/recognition_mode.dart';
+import '../settings/settings_providers.dart';
 import 'mic_lab_controller.dart';
 import 'widgets/calibration_card.dart';
 import 'widgets/chroma_bars.dart';
 import 'widgets/guess_display.dart';
 import 'widgets/level_meter.dart';
+import 'widgets/thresholds_card.dart';
 
 class MicLabScreen extends ConsumerWidget {
   const MicLabScreen({super.key});
@@ -16,6 +18,7 @@ class MicLabScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final lab = ref.watch(micLabProvider);
+    final thresholdPrefs = ref.watch(thresholdPrefsProvider);
     final theme = Theme.of(context);
     final highlight = lab.guess.symbol != null
         ? pitchClassesForChord(lab.guess.symbol!)
@@ -52,6 +55,36 @@ class MicLabScreen extends ConsumerWidget {
                   ref.read(micLabProvider.notifier).startGuitarCalibration(),
               onReset: () =>
                   ref.read(micLabProvider.notifier).resetCalibration(),
+            ),
+            const SizedBox(height: 12),
+            ThresholdsCard(
+              prefs: thresholdPrefs,
+              effective: lab.config,
+              onSensitivity: (v) => ref
+                  .read(thresholdPrefsProvider.notifier)
+                  .setSensitivity(v),
+              onUseAdvanced: (v) =>
+                  ref.read(thresholdPrefsProvider.notifier).setUseAdvanced(v),
+              onRequireYin: (v) => ref
+                  .read(thresholdPrefsProvider.notifier)
+                  .setRequireYinForHybrid(v),
+              onAdvancedChanged: ({
+                double? chromaMinScore,
+                double? chromaMargin,
+                double? chromaMinConcentration,
+                int? chromaHoldMs,
+                double? rmsSilence,
+              }) {
+                ref.read(thresholdPrefsProvider.notifier).setAdvanced(
+                      chromaMinScore: chromaMinScore,
+                      chromaMargin: chromaMargin,
+                      chromaMinConcentration: chromaMinConcentration,
+                      chromaHoldMs: chromaHoldMs,
+                      rmsSilence: rmsSilence,
+                    );
+              },
+              onReset: () =>
+                  ref.read(thresholdPrefsProvider.notifier).reset(),
             ),
             const SizedBox(height: 16),
             Text(

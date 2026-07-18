@@ -45,10 +45,11 @@ void main() {
       // First frames build hold — no symbol yet.
       final early = r.recognize(f, nowMs: 0);
       expect(early.symbol, isNull);
+      expect(early.blockReason, isNotNull);
       final late = r.recognize(f, nowMs: 200);
       expect(late.isSilence, isFalse);
       expect(late.symbol, 'C');
-      expect(late.confidence, greaterThan(0.5));
+      expect(late.confidence, greaterThan(0.4));
     });
 
     test('chroma rejects flat noise', () {

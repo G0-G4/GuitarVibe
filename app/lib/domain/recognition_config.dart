@@ -2,14 +2,15 @@
 class RecognitionConfig {
   const RecognitionConfig({
     this.rmsSilence = 0.012,
-    this.chromaMinScore = 0.50,
-    this.chromaMatchThreshold = 0.48,
-    this.chromaMargin = 0.06,
-    this.chromaMinConcentration = 0.42,
-    this.chromaHoldMs = 100,
+    this.chromaMinScore = 0.45,
+    this.chromaMatchThreshold = 0.43,
+    this.chromaMargin = 0.04,
+    this.chromaMinConcentration = 0.38,
+    this.chromaHoldMs = 80,
     this.holdMs = 100,
     this.yinMinConfidence = 0.80,
     this.medianWindow = 5,
+    this.requireYinForHybrid = true,
   });
 
   /// RMS below this (0–1 float samples) → silence / no guess.
@@ -39,6 +40,9 @@ class RecognitionConfig {
   /// Odd window for median pitch-class smooth.
   final int medianWindow;
 
+  /// Hybrid free-guess requires YIN support when true.
+  final bool requireYinForHybrid;
+
   /// Balanced defaults for uncalibrated use (usable without being noisy).
   static const balanced = RecognitionConfig();
 
@@ -55,6 +59,7 @@ class RecognitionConfig {
     int? holdMs,
     double? yinMinConfidence,
     int? medianWindow,
+    bool? requireYinForHybrid,
   }) {
     return RecognitionConfig(
       rmsSilence: rmsSilence ?? this.rmsSilence,
@@ -67,6 +72,7 @@ class RecognitionConfig {
       holdMs: holdMs ?? this.holdMs,
       yinMinConfidence: yinMinConfidence ?? this.yinMinConfidence,
       medianWindow: medianWindow ?? this.medianWindow,
+      requireYinForHybrid: requireYinForHybrid ?? this.requireYinForHybrid,
     );
   }
 }

@@ -6,10 +6,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../domain/calibration.dart';
 import '../../domain/recognition_config.dart';
 import '../../domain/recognition_mode.dart';
+import '../../domain/threshold_prefs.dart';
 
 const _scoringEnabledKey = 'scoringEnabled';
 const _recognitionModeKey = 'recognitionMode';
 const _calibrationKey = 'calibration.v1';
+const _thresholdPrefsKey = 'thresholdPrefs.v1';
 
 /// Whether mic scoring is enabled (persisted). Default: true.
 class ScoringEnabledNotifier extends Notifier<bool> {
@@ -117,8 +119,103 @@ final calibrationProvider =
   CalibrationNotifier.new,
 );
 
-/// Thresholds derived from calibration (or balanced defaults).
+/// User threshold sliders (sensitivity / advanced).
+class ThresholdPrefsNotifier extends Notifier<ThresholdPrefs> {
+  @override
+  ThresholdPrefs build() {
+    Future.microtask(_load);
+    return ThresholdPrefs.defaults;
+  }
+
+  Future<void> _load() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_thresholdPrefsKey);
+    if (raw == null || raw.isEmpty) {
+      state = ThresholdPrefs.defaults;
+      return;
+    }
+    try {
+      final map = jsonDecode(raw) as Map<String, dynamic>;
+      state = ThresholdPrefs.fromJson(map);
+    } catch (_) {
+      state = ThresholdPrefs.defaults;
+    }
+  }
+
+  Future<void> _save() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_thresholdPrefsKey, jsonEncode(state.toJson()));
+  }
+
+  Future<void> setPrefs(ThresholdPrefs next) async {
+    state = next;
+    await _save();
+  }
+
+  Future<void> setSensitivity(double value) async {
+    state = state.copyWith(sensitivity: value.clamp(0.0, 1.0), useAdvanced: false);
+    await _save();
+  }
+
+  Future<void> setUseAdvanced(bool value) async {
+    if (value && !state.useAdvanced) {
+      // Seed advanced fields from current effective config.
+      final cal = ref.read(calibrationProvider);
+      final base = configFromCalibration(cal);
+      final seeded = state.configFromSensitivity(base);
+      state = state.copyWith(
+        useAdvanced: true,
+        chromaMinScore: seeded.chromaMinScore,
+        chromaMargin: seeded.chromaMargin,
+        chromaMinConcentration: seeded.chromaMinConcentration,
+        chromaHoldMs: seeded.chromaHoldMs,
+        rmsSilence: seeded.rmsSilence,
+      );
+    } else {
+      state = state.copyWith(useAdvanced: value);
+    }
+    await _save();
+  }
+
+  Future<void> setRequireYinForHybrid(bool value) async {
+    state = state.copyWith(requireYinForHybrid: value);
+    await _save();
+  }
+
+  Future<void> setAdvanced({
+    double? chromaMinScore,
+    double? chromaMargin,
+    double? chromaMinConcentration,
+    int? chromaHoldMs,
+    double? rmsSilence,
+  }) async {
+    state = state.copyWith(
+      useAdvanced: true,
+      chromaMinScore: chromaMinScore,
+      chromaMargin: chromaMargin,
+      chromaMinConcentration: chromaMinConcentration,
+      chromaHoldMs: chromaHoldMs,
+      rmsSilence: rmsSilence,
+    );
+    await _save();
+  }
+
+  Future<void> reset() async {
+    state = ThresholdPrefs.defaults;
+    await _save();
+  }
+}
+
+final thresholdPrefsProvider =
+    NotifierProvider<ThresholdPrefsNotifier, ThresholdPrefs>(
+  ThresholdPrefsNotifier.new,
+);
+
+/// Thresholds: calibration base → user sensitivity / advanced overrides.
 final effectiveRecognitionConfigProvider = Provider<RecognitionConfig>((ref) {
   final cal = ref.watch(calibrationProvider);
-  return configFromCalibration(cal);
+  final prefs = ref.watch(thresholdPrefsProvider);
+  final base = configFromCalibration(cal);
+  final applied = prefs.applyTo(base);
+  return applied.copyWith(requireYinForHybrid: prefs.requireYinForHybrid);
 });
