@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "id": "swing-low",
+  "title": "Swing Low, Sweet Chariot",
+  "artist": "Traditional",
+  "key": "D",
+  "capo": 0,
+  "tempoBpm": 100,
+  "timeSignature": [4, 4],
+  "tags": ["folk", "traditional", "public-domain"],
+  "audio": null,
+  "sections": [
+    {
+      "id": "chorus",
+      "name": "Chorus",
+      "events": [
+        { "beat": 0, "durationBeats": 2, "chord": "D", "lyrics": "Swing low, sweet " },
+        { "beat": 2, "durationBeats": 1, "chord": "G", "lyrics": "chari" },
+        { "beat": 3, "durationBeats": 1, "chord": "D", "lyrics": "ot," },
+        { "beat": 4, "durationBeats": 4, "chord": "A7", "lyrics": "Comin' for to carry me home." },
+        { "beat": 8, "durationBeats": 2, "chord": "D7", "lyrics": "Swing low, sweet " },
+        { "beat": 10, "durationBeats": 1, "chord": "G", "lyrics": "chari" },
+        { "beat": 11, "durationBeats": 1, "chord": "D", "lyrics": "ot," },
+        { "beat": 12, "durationBeats": 2, "chord": "A7", "lyrics": "Comin' for to " },
+        { "beat": 14, "durationBeats": 2, "chord": "D", "lyrics": "carry me home." }
+      ]
+    },
+    {
+      "id": "verse",
+      "name": "Verse",
+      "events": [
+        { "beat": 16, "durationBeats": 2, "chord": "D", "lyrics": "I looked over Jordan, and " },
+        { "beat": 18, "durationBeats": 1, "chord": "G", "lyrics": "what did I " },
+        { "beat": 19, "durationBeats": 1, "chord": "D", "lyrics": "see," },
+        { "beat": 20, "durationBeats": 4, "chord": "A7", "lyrics": "Comin' for to carry me home." },
+        { "beat": 24, "durationBeats": 2, "chord": "D", "lyrics": "A band of angels " },
+        { "beat": 26, "durationBeats": 1, "chord": "G", "lyrics": "comin' after " },
+        { "beat": 27, "durationBeats": 1, "chord": "D", "lyrics": "me," },
+        { "beat": 28, "durationBeats": 2, "chord": "A7", "lyrics": "Comin' for to " },
+        { "beat": 30, "durationBeats": 2, "chord": "D", "lyrics": "carry me home." }
+      ]
+    }
+  ],
+  "accompaniment": {
+    "style": "metronome_and_pad",
+    "volume": 0.7
+  }
+}

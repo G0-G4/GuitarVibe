@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "training-c-g-am-f",
+  "title": "Training: C–G–Am–F",
+  "artist": "ChordCoach",
+  "key": "C",
+  "capo": 0,
+  "tempoBpm": 90,
+  "timeSignature": [4, 4],
+  "tags": ["training", "beginner"],
+  "audio": null,
+  "sections": [
+    {
+      "id": "loop",
+      "name": "Progression",
+      "events": [
+        { "beat": 0, "durationBeats": 4, "chord": "C", "lyrics": "One bar of C" },
+        { "beat": 4, "durationBeats": 4, "chord": "G", "lyrics": "One bar of G" },
+        { "beat": 8, "durationBeats": 4, "chord": "Am", "lyrics": "One bar of Am" },
+        { "beat": 12, "durationBeats": 4, "chord": "F", "lyrics": "One bar of F" },
+        { "beat": 16, "durationBeats": 4, "chord": "C", "lyrics": "Repeat C" },
+        { "beat": 20, "durationBeats": 4, "chord": "G", "lyrics": "Repeat G" },
+        { "beat": 24, "durationBeats": 4, "chord": "Am", "lyrics": "Repeat Am" },
+        { "beat": 28, "durationBeats": 4, "chord": "F", "lyrics": "Repeat F" }
+      ]
+    }
+  ],
+  "accompaniment": {
+    "style": "metronome_and_pad",
+    "volume": 0.7
+  }
+}
