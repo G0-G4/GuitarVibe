@@ -10,6 +10,7 @@ class PlayTransport extends StatefulWidget {
     required this.snapshot,
     required this.effectiveTempoBpm,
     required this.metronomeVolume,
+    required this.guideVolume,
     required this.onPause,
     required this.onResume,
     required this.onRestart,
@@ -18,6 +19,8 @@ class PlayTransport extends StatefulWidget {
     required this.onResetTempo,
     required this.onMetronomeVolume,
     required this.onToggleMetronomeMute,
+    required this.onGuideVolume,
+    required this.onToggleGuideMute,
   });
 
   final Song song;
@@ -27,6 +30,9 @@ class PlayTransport extends StatefulWidget {
   /// Metronome click gain 0–1 (0 = fully off).
   final double metronomeVolume;
 
+  /// Guitar guide (pad + strum) gain 0–1 (0 = fully off).
+  final double guideVolume;
+
   final VoidCallback onPause;
   final VoidCallback onResume;
   final VoidCallback onRestart;
@@ -35,6 +41,8 @@ class PlayTransport extends StatefulWidget {
   final VoidCallback onResetTempo;
   final ValueChanged<double> onMetronomeVolume;
   final VoidCallback onToggleMetronomeMute;
+  final ValueChanged<double> onGuideVolume;
+  final VoidCallback onToggleGuideMute;
 
   @override
   State<PlayTransport> createState() => _PlayTransportState();
@@ -129,11 +137,25 @@ class _PlayTransportState extends State<PlayTransport> {
           onReset: widget.onResetTempo,
         ),
         const SizedBox(height: 8),
-        _MetronomeVolumeRow(
+        _VolumeRow(
+          label: 'Click',
           volume: widget.metronomeVolume,
           enabled: _canControl,
+          muteTooltip: 'Mute metronome',
+          unmuteTooltip: 'Unmute metronome',
+          activeIcon: Icons.music_note,
           onChanged: widget.onMetronomeVolume,
           onToggleMute: widget.onToggleMetronomeMute,
+        ),
+        _VolumeRow(
+          label: 'Guide',
+          volume: widget.guideVolume,
+          enabled: _canControl,
+          muteTooltip: 'Mute guitar guide',
+          unmuteTooltip: 'Unmute guitar guide',
+          activeIcon: Icons.queue_music,
+          onChanged: widget.onGuideVolume,
+          onToggleMute: widget.onToggleGuideMute,
         ),
         const SizedBox(height: 12),
         Row(
@@ -244,16 +266,24 @@ class _TempoChip extends StatelessWidget {
   }
 }
 
-class _MetronomeVolumeRow extends StatelessWidget {
-  const _MetronomeVolumeRow({
+class _VolumeRow extends StatelessWidget {
+  const _VolumeRow({
+    required this.label,
     required this.volume,
     required this.enabled,
+    required this.muteTooltip,
+    required this.unmuteTooltip,
+    required this.activeIcon,
     required this.onChanged,
     required this.onToggleMute,
   });
 
+  final String label;
   final double volume;
   final bool enabled;
+  final String muteTooltip;
+  final String unmuteTooltip;
+  final IconData activeIcon;
   final ValueChanged<double> onChanged;
   final VoidCallback onToggleMute;
 
@@ -265,15 +295,24 @@ class _MetronomeVolumeRow extends StatelessWidget {
 
     return Row(
       children: [
+        SizedBox(
+          width: 48,
+          child: Text(
+            label,
+            style: theme.textTheme.labelMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ),
         IconButton(
           onPressed: enabled ? onToggleMute : null,
-          tooltip: muted ? 'Unmute metronome' : 'Mute metronome',
+          tooltip: muted ? unmuteTooltip : muteTooltip,
           icon: Icon(
             muted
                 ? Icons.volume_off
                 : volume < 0.35
                     ? Icons.volume_down
-                    : Icons.volume_up,
+                    : activeIcon,
           ),
         ),
         Expanded(

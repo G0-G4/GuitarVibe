@@ -65,7 +65,9 @@ class _SongDetailBody extends StatelessWidget {
               if (song.key != null) _MetaChip(label: 'Key ${song.key}'),
               if (song.capo > 0) _MetaChip(label: 'Capo ${song.capo}'),
               _MetaChip(
-                label: song.hasAudio ? 'Backing audio' : 'Metronome / synth',
+                label: song.hasAudio
+                    ? 'Backing audio'
+                    : 'Metronome + guitar guide',
               ),
               if (song.hasStrum)
                 _MetaChip(

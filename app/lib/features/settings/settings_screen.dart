@@ -59,6 +59,8 @@ class SettingsScreen extends ConsumerWidget {
           const Divider(height: 1),
           _MetronomeVolumeTile(theme: theme),
           const Divider(height: 1),
+          _GuideVolumeTile(theme: theme),
+          const Divider(height: 1),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: Text(
@@ -126,9 +128,11 @@ class SettingsScreen extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
             child: Text(
-              'Play near the mic and keep metronome volume moderate (or mute) '
-              'so clicks do not drown out your guitar. Use Mic Lab to '
-              'calibrate room/guitar noise isolation and compare modes.',
+              'Play near the mic and keep metronome / guide volume moderate '
+              '(or mute) so they do not drown out your guitar. Prefer '
+              'headphones when the guitar guide is on and scoring is enabled. '
+              'Use Mic Lab to calibrate room/guitar noise isolation and '
+              'compare modes.',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -148,6 +152,64 @@ class _MetronomeVolumeTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final volume = ref.watch(metronomeVolumeProvider);
+    return _VolumeSliderTile(
+      theme: theme,
+      title: 'Metronome volume',
+      subtitle:
+          'Click track during count-in and metronome play-along. '
+          'Drag to 0 or tap the icon to mute completely.',
+      volume: volume,
+      icon: Icons.music_note,
+      onMute: () => ref.read(metronomeVolumeProvider.notifier).toggleMute(),
+      onChanged: (v) =>
+          ref.read(metronomeVolumeProvider.notifier).setVolume(v),
+    );
+  }
+}
+
+class _GuideVolumeTile extends ConsumerWidget {
+  const _GuideVolumeTile({required this.theme});
+
+  final ThemeData theme;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final volume = ref.watch(guideVolumeProvider);
+    return _VolumeSliderTile(
+      theme: theme,
+      title: 'Guitar guide volume',
+      subtitle:
+          'Synthetic guitar pad + strum pattern so you can hear the '
+          'chords and rhythm. Headphones recommended when scoring.',
+      volume: volume,
+      icon: Icons.queue_music,
+      onMute: () => ref.read(guideVolumeProvider.notifier).toggleMute(),
+      onChanged: (v) => ref.read(guideVolumeProvider.notifier).setVolume(v),
+    );
+  }
+}
+
+class _VolumeSliderTile extends StatelessWidget {
+  const _VolumeSliderTile({
+    required this.theme,
+    required this.title,
+    required this.subtitle,
+    required this.volume,
+    required this.icon,
+    required this.onMute,
+    required this.onChanged,
+  });
+
+  final ThemeData theme;
+  final String title;
+  final String subtitle;
+  final double volume;
+  final IconData icon;
+  final VoidCallback onMute;
+  final ValueChanged<double> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
     final muted = volume <= 0;
     final pct = (volume * 100).round();
 
@@ -159,13 +221,13 @@ class _MetronomeVolumeTile extends ConsumerWidget {
           Row(
             children: [
               Icon(
-                muted ? Icons.volume_off : Icons.music_note,
+                muted ? Icons.volume_off : icon,
                 color: theme.colorScheme.onSurfaceVariant,
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  'Metronome volume',
+                  title,
                   style: theme.textTheme.titleMedium,
                 ),
               ),
@@ -181,8 +243,7 @@ class _MetronomeVolumeTile extends ConsumerWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            'Click track during count-in and metronome play-along. '
-            'Drag to 0 or tap the icon to mute completely.',
+            subtitle,
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -191,8 +252,7 @@ class _MetronomeVolumeTile extends ConsumerWidget {
             children: [
               IconButton(
                 tooltip: muted ? 'Unmute' : 'Mute',
-                onPressed: () =>
-                    ref.read(metronomeVolumeProvider.notifier).toggleMute(),
+                onPressed: onMute,
                 icon: Icon(
                   muted
                       ? Icons.volume_off
@@ -206,9 +266,7 @@ class _MetronomeVolumeTile extends ConsumerWidget {
                   min: 0,
                   max: 1,
                   value: volume.clamp(0.0, 1.0),
-                  onChanged: (v) => ref
-                      .read(metronomeVolumeProvider.notifier)
-                      .setVolume(v),
+                  onChanged: onChanged,
                 ),
               ),
             ],

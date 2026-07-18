@@ -22,7 +22,12 @@
   "strum": {
     "name": "Down on ONE",
     "unitBeats": 1,
-    "steps": ["D", ".", ".", "."]
+    "steps": [
+      "D",
+      ".",
+      ".",
+      "."
+    ]
   },
   "sections": [
     {
@@ -633,7 +638,7 @@
     }
   ],
   "accompaniment": {
-    "style": "metronome",
+    "style": "metronome_and_pad",
     "volume": 0.8
   }
 }

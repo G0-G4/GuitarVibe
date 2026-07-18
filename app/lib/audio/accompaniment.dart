@@ -1,20 +1,27 @@
 import '../domain/song.dart';
 import 'backing_audio_player.dart';
+import 'guitar_guide_player.dart';
 import 'metronome_player.dart';
 
-/// Facade: prefer backing audio when present, else metronome.
+/// Facade: prefer backing audio when present, else metronome + guitar guide.
 ///
 /// Count-in always uses the metronome (when style ≠ `none`) so the user
 /// can lock in before a backing track starts.
+///
+/// Guitar guide (pad + strum samples) runs on the metronome path only;
+/// when backing audio is master after music starts, guide is silent.
 class Accompaniment {
   Accompaniment({
     MetronomePlayer? metronome,
     BackingAudioPlayer? backing,
+    GuitarGuidePlayer? guide,
   })  : _metronome = metronome ?? MetronomePlayer(),
-        _backing = backing ?? BackingAudioPlayer();
+        _backing = backing ?? BackingAudioPlayer(),
+        _guide = guide ?? GuitarGuidePlayer();
 
   final MetronomePlayer _metronome;
   final BackingAudioPlayer _backing;
+  final GuitarGuidePlayer _guide;
 
   bool _useAudio = false;
   bool _musicPlaying = false;
@@ -23,12 +30,17 @@ class Accompaniment {
 
   BackingAudioPlayer get backing => _backing;
 
-  Future<void> prepare(Song song, {double? metronomeVolume}) async {
+  Future<void> prepare(
+    Song song, {
+    double? metronomeVolume,
+    double? guideVolume,
+  }) async {
     _useAudio = song.hasAudio;
     _musicPlaying = false;
 
     // Metronome for count-in (and full session when no audio).
     await _metronome.prepare(song, volume: metronomeVolume);
+    await _guide.prepare(song, volume: guideVolume);
 
     if (_useAudio) {
       await _backing.prepare(song);
@@ -41,11 +53,17 @@ class Accompaniment {
 
   double get metronomeVolume => _metronome.volume;
 
+  /// Live guitar guide gain 0–1 (0 = fully off).
+  Future<void> setGuideVolume(double volume) => _guide.setVolume(volume);
+
+  double get guideVolume => _guide.volume;
+
   /// Called every clock tick with the current song beat (may be negative).
   Future<void> onBeat(double beat) async {
-    // With backing audio as master after music starts, skip click track.
+    // With backing audio as master after music starts, skip click + guide.
     if (_useAudio && _musicPlaying) return;
     await _metronome.onBeat(beat);
+    await _guide.onBeat(beat);
   }
 
   /// When song music starts (beat >= 0).
@@ -60,7 +78,11 @@ class Accompaniment {
   /// onto a backing track. Respects [playing] (pause after seek if false).
   Future<void> seekToBeat(double beat, {required bool playing}) async {
     _metronome.reset();
-    if (!_useAudio) return;
+    _guide.reset();
+    if (!_useAudio) {
+      // Metronome path: guide will re-fire chord/step on next ticks.
+      return;
+    }
 
     if (beat < 0) {
       // Still in count-in: stop any started track.
@@ -116,12 +138,17 @@ class Accompaniment {
       await _backing.stop();
     }
     await _metronome.stop();
+    await _guide.stop();
   }
 
-  void resetMetronome() => _metronome.reset();
+  void resetMetronome() {
+    _metronome.reset();
+    _guide.reset();
+  }
 
   Future<void> dispose() async {
     await _metronome.dispose();
     await _backing.dispose();
+    await _guide.dispose();
   }
 }

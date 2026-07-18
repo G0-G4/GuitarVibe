@@ -29,6 +29,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     final session = ref.watch(playSessionProvider(widget.songId));
     final songAsync = ref.watch(songByIdProvider(widget.songId));
     final metronomeVolume = ref.watch(metronomeVolumeProvider);
+    final guideVolume = ref.watch(guideVolumeProvider);
 
     // Navigate when finished.
     ref.listen(playSessionProvider(widget.songId), (prev, next) {
@@ -174,6 +175,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                         snapshot: snapshot,
                         effectiveTempoBpm: effectiveTempo,
                         metronomeVolume: metronomeVolume,
+                        guideVolume: guideVolume,
                         onPause: controller.pause,
                         onResume: controller.resume,
                         onRestart: () {
@@ -189,6 +191,10 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                         onToggleMetronomeMute: () => ref
                             .read(metronomeVolumeProvider.notifier)
                             .toggleMute(),
+                        onGuideVolume: (v) =>
+                            ref.read(guideVolumeProvider.notifier).setVolume(v),
+                        onToggleGuideMute: () =>
+                            ref.read(guideVolumeProvider.notifier).toggleMute(),
                       ),
                     ],
                   ),

@@ -78,7 +78,9 @@ No in-app editor — edit files in any text editor.
 
 ### `strum` (optional) — right-hand pattern / «бой»
 
-Visual guidance only (arrows in the player). Does **not** drive audio synthesis or scoring.
+Visual guidance (arrows in the player) and **drives guitar guide audio** when
+the synthetic guide is enabled (strum samples on `D`/`U`/`X`). Does **not**
+affect scoring.
 
 **Object form (canonical):**
 
@@ -152,11 +154,18 @@ Omit `strum` entirely when the song has no prescribed right-hand pattern.
 
 | `style` | Behavior |
 |---|---|
-| `metronome` | Clicks only |
-| `metronome_and_pad` | Click + sustained chord tones (when implemented) |
+| `metronome` | Clicks + optional guitar guide (user volume) |
+| `metronome_and_pad` | Clicks + guitar guide (pad on chord change; strum samples if `strum` set) |
 | `none` | Silent (user plays alone; UI still scrolls) |
 
-If `audio` is set, audio is preferred; `accompaniment` is ignored or used as click track overlay later.
+**Guitar guide (synthetic reference):** bundled pluck samples (MIDI C3–C5) play
+chord tones so the user can listen and play along. Without `strum`, a soft pad
+fires on each chord change. With `strum`, down/up strokes arpeggiate the
+voicing; `X` plays a mute chuck. User volume: Settings → Guitar guide volume
+(0 = off). Prefer headphones when mic scoring is on (guide can bleed into the mic).
+
+If `audio` is set, backing audio is preferred as master clock; after music starts,
+metronome + guide are silent (count-in still uses the metronome).
 
 ---
 

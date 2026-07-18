@@ -103,10 +103,14 @@ class PlaySessionController extends Notifier<PlaySessionState?> {
       _disposeResources();
     });
 
-    // Live metronome volume from settings (also controllable mid-session).
+    // Live metronome / guide volume from settings (also mid-session).
     ref.listen<double>(metronomeVolumeProvider, (prev, next) {
       final acc = _accompaniment;
       if (acc != null) unawaited(acc.setMetronomeVolume(next));
+    });
+    ref.listen<double>(guideVolumeProvider, (prev, next) {
+      final acc = _accompaniment;
+      if (acc != null) unawaited(acc.setGuideVolume(next));
     });
 
     // Load song asynchronously; auto-start count-in when ready.
@@ -154,8 +158,13 @@ class PlaySessionController extends Notifier<PlaySessionState?> {
 
     try {
       final metronomeVolume = ref.read(metronomeVolumeProvider);
+      final guideVolume = ref.read(guideVolumeProvider);
       final accompaniment = Accompaniment();
-      await accompaniment.prepare(song, metronomeVolume: metronomeVolume);
+      await accompaniment.prepare(
+        song,
+        metronomeVolume: metronomeVolume,
+        guideVolume: guideVolume,
+      );
       if (_disposed) {
         await accompaniment.dispose();
         return;

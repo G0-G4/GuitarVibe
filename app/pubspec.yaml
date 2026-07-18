@@ -66,6 +66,7 @@ flutter:
 
   assets:
     - assets/audio/
+    - assets/audio/guitar/
     - assets/songs/index.json
     - assets/songs/easy-a-d/
     - assets/songs/training-c-g-am-f/

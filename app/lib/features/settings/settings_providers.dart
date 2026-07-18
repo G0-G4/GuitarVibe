@@ -16,9 +16,13 @@ const _calibrationKey = 'calibration.v1';
 const _thresholdPrefsKey = 'thresholdPrefs.v1';
 const _chordVocabularyKey = 'chordVocabulary.v1';
 const _metronomeVolumeKey = 'metronomeVolume';
+const _guideVolumeKey = 'guideVolume';
 
 /// Default metronome gain (matches song accompaniment default).
 const double defaultMetronomeVolume = 0.7;
+
+/// Default guitar guide (pad + strum) gain.
+const double defaultGuideVolume = 0.55;
 
 /// Metronome click volume 0–1 (persisted). 0 = fully off.
 class MetronomeVolumeNotifier extends Notifier<double> {
@@ -64,6 +68,49 @@ class MetronomeVolumeNotifier extends Notifier<double> {
 final metronomeVolumeProvider =
     NotifierProvider<MetronomeVolumeNotifier, double>(
   MetronomeVolumeNotifier.new,
+);
+
+/// Guitar guide (pad + strum samples) volume 0–1 (persisted). 0 = off.
+class GuideVolumeNotifier extends Notifier<double> {
+  double _lastAudible = defaultGuideVolume;
+
+  @override
+  double build() {
+    Future.microtask(_load);
+    return defaultGuideVolume;
+  }
+
+  Future<void> _load() async {
+    final prefs = await SharedPreferences.getInstance();
+    final v = prefs.getDouble(_guideVolumeKey);
+    if (v == null) {
+      state = defaultGuideVolume;
+      return;
+    }
+    state = v.clamp(0.0, 1.0);
+    if (state > 0) _lastAudible = state;
+  }
+
+  Future<void> setVolume(double value) async {
+    final v = value.clamp(0.0, 1.0);
+    state = v;
+    if (v > 0) _lastAudible = v;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble(_guideVolumeKey, v);
+  }
+
+  Future<void> toggleMute() async {
+    if (state > 0) {
+      _lastAudible = state;
+      await setVolume(0);
+    } else {
+      await setVolume(_lastAudible > 0 ? _lastAudible : defaultGuideVolume);
+    }
+  }
+}
+
+final guideVolumeProvider = NotifierProvider<GuideVolumeNotifier, double>(
+  GuideVolumeNotifier.new,
 );
 
 /// Whether mic scoring is enabled (persisted). Default: true.

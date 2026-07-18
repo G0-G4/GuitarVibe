@@ -285,7 +285,9 @@ guitar/
 
 **Exit:** demo song play-along offline on Mac.
 
-Notes: metronome clicks via `just_audio` + bundled WAV assets; simple pad deferred. Backing-audio path implemented (no bundled track yet — all demos use metronome).
+Notes: metronome clicks via `just_audio` + bundled WAV assets. Guitar guide
+(pad + strum samples, Karplus–Strong bank) implemented — see Phase 4 note.
+Backing-audio path implemented (no bundled track yet — all demos use metronome/guide).
 
 ### Phase 2 — Import files (no editor) — **deferred**
 
@@ -330,7 +332,7 @@ Notes: `record` PCM16 stream + `pitch_detector_dart` (YIN); match = pitch class 
 
 - [ ] Enable android/ios/windows targets
 - [ ] Chord diagrams, transpose/capo
-- [ ] Better synth fallback
+- [x] Better synth fallback — guitar guide: pad on chord change + strum pattern samples (`assets/audio/guitar/`, Settings volume)
 - [ ] Optional: BPM estimate from audio (spike → feature)
 - [ ] Tests, packaging
 

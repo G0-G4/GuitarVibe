@@ -6,27 +6,74 @@
   "key": "G",
   "capo": 0,
   "tempoBpm": 120,
-  "timeSignature": [3, 4],
-  "tags": ["training", "waltz", "3/4"],
+  "timeSignature": [
+    3,
+    4
+  ],
+  "tags": [
+    "training",
+    "waltz",
+    "3/4"
+  ],
   "audio": null,
   "sections": [
     {
       "id": "a",
       "name": "A",
       "events": [
-        { "beat": 0, "durationBeats": 3, "chord": "G", "lyrics": "One two three" },
-        { "beat": 3, "durationBeats": 3, "chord": "D", "lyrics": "One two three" },
-        { "beat": 6, "durationBeats": 3, "chord": "C", "lyrics": "One two three" },
-        { "beat": 9, "durationBeats": 3, "chord": "G", "lyrics": "One two three" },
-        { "beat": 12, "durationBeats": 3, "chord": "G", "lyrics": "Again" },
-        { "beat": 15, "durationBeats": 3, "chord": "D", "lyrics": "Again" },
-        { "beat": 18, "durationBeats": 3, "chord": "C", "lyrics": "Again" },
-        { "beat": 21, "durationBeats": 3, "chord": "G", "lyrics": "Home" }
+        {
+          "beat": 0,
+          "durationBeats": 3,
+          "chord": "G",
+          "lyrics": "One two three"
+        },
+        {
+          "beat": 3,
+          "durationBeats": 3,
+          "chord": "D",
+          "lyrics": "One two three"
+        },
+        {
+          "beat": 6,
+          "durationBeats": 3,
+          "chord": "C",
+          "lyrics": "One two three"
+        },
+        {
+          "beat": 9,
+          "durationBeats": 3,
+          "chord": "G",
+          "lyrics": "One two three"
+        },
+        {
+          "beat": 12,
+          "durationBeats": 3,
+          "chord": "G",
+          "lyrics": "Again"
+        },
+        {
+          "beat": 15,
+          "durationBeats": 3,
+          "chord": "D",
+          "lyrics": "Again"
+        },
+        {
+          "beat": 18,
+          "durationBeats": 3,
+          "chord": "C",
+          "lyrics": "Again"
+        },
+        {
+          "beat": 21,
+          "durationBeats": 3,
+          "chord": "G",
+          "lyrics": "Home"
+        }
       ]
     }
   ],
   "accompaniment": {
-    "style": "metronome",
+    "style": "metronome_and_pad",
     "volume": 0.7
   }
 }
