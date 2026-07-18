@@ -19,22 +19,27 @@
     "downstrum"
   ],
   "audio": null,
+  "strum": {
+    "name": "Down on ONE",
+    "unitBeats": 1,
+    "steps": ["D", ".", ".", "."]
+  },
   "sections": [
     {
       "id": "pattern",
-      "name": "Downstrums \u00b7 5 min (A \u2194 D every bar)",
+      "name": "Down on ONE \u00b7 5 min (A \u2194 D every bar)",
       "events": [
         {
           "beat": 0,
           "durationBeats": 4,
           "chord": "A",
-          "lyrics": "ONE two three four  (\u2193 \u2193 \u2193 \u2193)"
+          "lyrics": "ONE two three four  (\u2193 \u00b7 \u00b7 \u00b7)"
         },
         {
           "beat": 4,
           "durationBeats": 4,
           "chord": "D",
-          "lyrics": "ONE two three four  (\u2193 \u2193 \u2193 \u2193)"
+          "lyrics": "ONE two three four  (\u2193 \u00b7 \u00b7 \u00b7)"
         },
         {
           "beat": 8,
@@ -622,7 +627,7 @@
           "beat": 396,
           "durationBeats": 4,
           "chord": "D",
-          "lyrics": "Last bar \u2014 keep the downstrums steady"
+          "lyrics": "Last bar \u2014 down only on ONE (chord change)"
         }
       ]
     }

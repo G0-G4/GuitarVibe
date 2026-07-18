@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../domain/song.dart';
+import '../player/widgets/strum_pattern_bar.dart';
 import 'library_providers.dart';
 
 class SongDetailScreen extends ConsumerWidget {
@@ -66,9 +67,20 @@ class _SongDetailBody extends StatelessWidget {
               _MetaChip(
                 label: song.hasAudio ? 'Backing audio' : 'Metronome / synth',
               ),
+              if (song.hasStrum)
+                _MetaChip(
+                  label: song.strum!.name != null &&
+                          song.strum!.name!.isNotEmpty
+                      ? 'Strum: ${song.strum!.name}'
+                      : 'Strum pattern',
+                ),
               ...song.tags.map((t) => _MetaChip(label: t)),
             ],
           ),
+          if (song.hasStrum) ...[
+            const SizedBox(height: 16),
+            StrumPatternPreview(pattern: song.strum!),
+          ],
           const SizedBox(height: 24),
           FilledButton.icon(
             onPressed: () => context.push('/song/${song.id}/play'),

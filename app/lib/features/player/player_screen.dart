@@ -10,6 +10,7 @@ import 'play_session_controller.dart';
 import 'widgets/chord_scroller.dart';
 import 'widgets/countdown_overlay.dart';
 import 'widgets/play_transport.dart';
+import 'widgets/strum_pattern_bar.dart';
 
 class PlayerScreen extends ConsumerStatefulWidget {
   const PlayerScreen({super.key, required this.songId});
@@ -135,6 +136,13 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                               : controller.seekToBeat,
                         ),
                       ),
+                      if (song.hasStrum) ...[
+                        const SizedBox(height: 12),
+                        StrumPatternBar(
+                          pattern: song.strum!,
+                          currentBeat: snapshot.currentBeat,
+                        ),
+                      ],
                       if (scoringActive) ...[
                         const SizedBox(height: 12),
                         LiveFeedbackBadge(

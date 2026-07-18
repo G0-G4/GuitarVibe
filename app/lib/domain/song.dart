@@ -1,6 +1,10 @@
 // Domain models for playable songs (schema v1).
 // See docs/SONG_FORMAT.md.
 
+import 'strum_pattern.dart';
+
+export 'strum_pattern.dart';
+
 class SongAudio {
   const SongAudio({
     required this.file,
@@ -125,6 +129,7 @@ class Song {
     this.capo = 0,
     this.tags = const [],
     this.audio,
+    this.strum,
     this.accompaniment = const AccompanimentPrefs(),
   });
 
@@ -138,10 +143,14 @@ class Song {
   final List<int> timeSignature;
   final List<String> tags;
   final SongAudio? audio;
+
+  /// Optional right-hand strum pattern ("бой") for UI guidance.
+  final StrumPattern? strum;
   final List<SongSection> sections;
   final AccompanimentPrefs accompaniment;
 
   bool get hasAudio => audio != null;
+  bool get hasStrum => strum != null && !strum!.isEmpty;
 
   /// All chord events in order (flattened).
   List<ChordEvent> get allEvents {
@@ -169,8 +178,11 @@ class Song {
 
   factory Song.fromJson(Map<String, dynamic> json) {
     final ts = json['timeSignature'] as List<dynamic>? ?? [4, 4];
+    final timeSignature = ts.map((e) => (e as num).toInt()).toList();
     final rawSections = json['sections'] as List<dynamic>? ?? const [];
     final audioJson = json['audio'];
+    final barBeats =
+        timeSignature.isNotEmpty ? timeSignature[0].toDouble() : 4.0;
 
     return Song(
       schemaVersion: json['schemaVersion'] as int? ?? 1,
@@ -180,7 +192,7 @@ class Song {
       key: json['key'] as String?,
       capo: json['capo'] as int? ?? 0,
       tempoBpm: (json['tempoBpm'] as num).toDouble(),
-      timeSignature: ts.map((e) => (e as num).toInt()).toList(),
+      timeSignature: timeSignature,
       tags: (json['tags'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
@@ -188,6 +200,7 @@ class Song {
       audio: audioJson is Map<String, dynamic>
           ? SongAudio.fromJson(audioJson)
           : null,
+      strum: StrumPattern.fromJson(json['strum'], barBeats: barBeats),
       sections: rawSections
           .map((e) => SongSection.fromJson(e as Map<String, dynamic>))
           .toList(),
@@ -208,6 +221,7 @@ class Song {
         'timeSignature': timeSignature,
         'tags': tags,
         'audio': audio?.toJson(),
+        if (strum != null) 'strum': strum!.toJson(),
         'sections': sections.map((s) => s.toJson()).toList(),
         'accompaniment': accompaniment.toJson(),
       };

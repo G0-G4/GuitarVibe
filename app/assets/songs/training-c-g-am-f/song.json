@@ -9,6 +9,11 @@
   "timeSignature": [4, 4],
   "tags": ["training", "beginner"],
   "audio": null,
+  "strum": {
+    "name": "Six-stroke",
+    "unitBeats": 0.5,
+    "steps": ["D", ".", "D", "U", ".", "D", "U", "."]
+  },
   "sections": [
     {
       "id": "loop",

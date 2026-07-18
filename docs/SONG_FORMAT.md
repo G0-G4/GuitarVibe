@@ -18,6 +18,11 @@ No in-app editor — edit files in any text editor.
   "timeSignature": [4, 4],
   "tags": ["training"],
   "audio": null,
+  "strum": {
+    "name": "Six-stroke",
+    "unitBeats": 0.5,
+    "steps": ["D", ".", "D", "U", ".", "D", "U", "."]
+  },
   "sections": [
     {
       "id": "loop",
@@ -53,6 +58,7 @@ No in-app editor — edit files in any text editor.
 | `timeSignature` | `[int, int]` | yes | e.g. `[4, 4]` |
 | `tags` | string[] | no | |
 | `audio` | object \| null | no | Backing track; see below |
+| `strum` | object \| string \| null | no | Optional right-hand pattern ("бой"); see below |
 | `sections` | Section[] | yes | At least one |
 | `accompaniment` | object | no | Synth/metronome prefs when no audio |
 
@@ -69,6 +75,59 @@ No in-app editor — edit files in any text editor.
 - Relative to song pack directory or app documents.
 - When present, playback position is the master clock.
 - `offsetSec`: song beat 0 maps to this time in the file.
+
+### `strum` (optional) — right-hand pattern / «бой»
+
+Visual guidance only (arrows in the player). Does **not** drive audio synthesis or scoring.
+
+**Object form (canonical):**
+
+```json
+"strum": {
+  "name": "Six-stroke",
+  "unitBeats": 0.5,
+  "steps": ["D", ".", "D", "U", ".", "D", "U", "."]
+}
+```
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `name` | string | no | Display label |
+| `unitBeats` | number | yes* | Length of one step in beats (`0.5` = 8ths, `1` = quarters). *If omitted, derived as bar length ÷ step count |
+| `steps` | string[] | yes | Ordered tokens (see table) |
+
+**Step tokens**
+
+| Token | UI | Meaning |
+|---|---|---|
+| `D` | ↓ | Downstroke |
+| `U` | ↑ | Upstroke |
+| `.` | · | Rest / no pick |
+| `X` | × | Mute / chuck |
+| other | · | Treated as rest (load still succeeds) |
+
+The pattern **loops** from song beat 0:  
+`stepIndex = floor(currentBeat / unitBeats) % steps.length`.
+
+Cycle length in beats should usually match one bar (e.g. 8 × 0.5 = 4 in 4/4, or 6 × 0.5 = 3 in 3/4). Mismatch is allowed but may feel off-meter.
+
+**Compact string form:**
+
+```json
+"strum": "D.DU.DU."
+```
+
+Each character is one step. `unitBeats` defaults to `timeSignature[0] / length` (one bar per cycle). Prefer a step count that divides the bar evenly (e.g. 8 steps in 4/4 → eighth notes).
+
+**Examples**
+
+| Pattern | JSON | Notes |
+|---|---|---|
+| Down every beat | `{"name":"Downstrums","unitBeats":1,"steps":["D","D","D","D"]}` | Stage-1 training |
+| Шестёрка | `"D.DU.DU."` or object with 8 × `unitBeats: 0.5` | Classic beginner бой (full bar) |
+| With mutes | `{"unitBeats":0.5,"steps":["D","X","D","U","X","D","U","."]}` | |
+
+Omit `strum` entirely when the song has no prescribed right-hand pattern.
 
 ### `Section`
 
