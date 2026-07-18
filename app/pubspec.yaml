@@ -38,6 +38,9 @@ dependencies:
   flutter_riverpod: ^3.3.2
   go_router: ^17.3.0
   just_audio: ^0.10.6
+  record: ^6.0.0
+  pitch_detector_dart: ^0.0.7
+  shared_preferences: ^2.5.3
 
 dev_dependencies:
   flutter_test:

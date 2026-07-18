@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../domain/play_session.dart';
 import '../library/library_providers.dart';
+import '../scoring/widgets/live_feedback_badge.dart';
 import 'play_session_controller.dart';
 import 'widgets/chord_scroller.dart';
 import 'widgets/countdown_overlay.dart';
@@ -65,6 +66,8 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
         final lyrics = event?.lyrics ?? '';
         final theme = Theme.of(context);
         final error = session?.error;
+        final scoringError = session?.scoringError;
+        final scoringActive = session?.scoringActive ?? false;
 
         return Scaffold(
           appBar: AppBar(
@@ -104,6 +107,15 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                           ),
                         ),
                       ],
+                      if (scoringError != null) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          scoringError,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.error,
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 16),
                       Expanded(
                         flex: 3,
@@ -112,7 +124,14 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                           currentBeat: snapshot.currentBeat,
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      if (scoringActive) ...[
+                        const SizedBox(height: 12),
+                        LiveFeedbackBadge(
+                          grade: session?.lastHit,
+                          streak: session?.liveScore?.currentStreak ?? 0,
+                        ),
+                      ],
+                      const SizedBox(height: 12),
                       SizedBox(
                         height: 72,
                         child: Center(

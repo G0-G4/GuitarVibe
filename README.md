@@ -25,14 +25,17 @@ Requires [Flutter](https://docs.flutter.dev/get-started/install) stable, Xcode, 
 - Authoring is **text-only** (no in-app editor): edit `.song.json` or ChordPro `.cho`
 - Optional backing audio next to the song; otherwise metronome clicks
 
-## Play-along (Phase 1)
+## Play-along
 
 From a song detail screen tap **Play**:
 
 1. One-bar count-in with metronome
 2. Horizontal chord scroller + lyrics in time
-3. Pause / resume / restart
-4. End screen (scoring comes in Phase 3)
+3. Live scoring badge (Good / Early / Late / Miss) when mic scoring is on
+4. Pause / resume / restart
+5. End screen with accuracy and hit breakdown
+
+Toggle scoring in **Settings** (library gear icon). macOS will ask for microphone access.
 
 ## Roadmap (short)
 
@@ -40,9 +43,9 @@ From a song detail screen tap **Play**:
 |---|---|
 | 0 Foundation (library, format, macOS) | done |
 | 1 Play-along + audio/metronome | done |
-| 2 Import `.cho` / `.song.json` files | next |
-| 3 Mic scoring + live early/late feedback | planned |
-| 4 More platforms + polish | planned |
+| 2 Import `.cho` / `.song.json` files | deferred |
+| 3 Mic scoring + live early/late feedback | done |
+| 4 More platforms + polish | next |
 | 5 Online catalog | later |
 
 See [docs/PLAN.md](docs/PLAN.md) for details.

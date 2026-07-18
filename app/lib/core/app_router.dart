@@ -4,6 +4,7 @@ import '../features/library/library_screen.dart';
 import '../features/library/song_detail_screen.dart';
 import '../features/player/player_screen.dart';
 import '../features/player/session_complete_screen.dart';
+import '../features/settings/settings_screen.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/',
@@ -13,6 +14,11 @@ final appRouter = GoRouter(
       name: 'library',
       builder: (context, state) => const LibraryScreen(),
       routes: [
+        GoRoute(
+          path: 'settings',
+          name: 'settings',
+          builder: (context, state) => const SettingsScreen(),
+        ),
         GoRoute(
           path: 'song/:id',
           name: 'song',

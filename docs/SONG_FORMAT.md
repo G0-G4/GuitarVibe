@@ -154,7 +154,9 @@ Missing tempo → default `120`. Missing duration → `4` beats.
 - `N.C.` / `NC` = no chord
 - Capo is metadata for display/scoring; stored chords are as written (as-fingered or concert — v1: **as written in file**)
 
-Chord tone sets for scoring live in `assets/chords/chords.json` (Phase 3).
+Scoring (Phase 3) resolves chord tones **algorithmically** from the symbol
+(root + quality → pitch classes). Unknown qualities fall back to a major or
+minor triad. Optional `assets/chords/chords.json` overrides are not required for v1.
 
 ---
 

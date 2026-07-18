@@ -16,6 +16,13 @@ class LibraryScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('ChordCoach'),
         centerTitle: false,
+        actions: [
+          IconButton(
+            tooltip: 'Settings',
+            icon: const Icon(Icons.settings_outlined),
+            onPressed: () => context.push('/settings'),
+          ),
+        ],
       ),
       body: songsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),

@@ -276,7 +276,7 @@ guitar/
 
 **Exit:** `flutter run -d macos` → список песен → detail.
 
-### Phase 1 — Play-along ← **сейчас**
+### Phase 1 — Play-along
 
 - [x] Beat/audio clock, play/pause
 - [x] Chord scroller + lyrics sync
@@ -287,7 +287,9 @@ guitar/
 
 Notes: metronome clicks via `just_audio` + bundled WAV assets; simple pad deferred. Backing-audio path implemented (no bundled track yet — all demos use metronome).
 
-### Phase 2 — Import files (no editor)
+### Phase 2 — Import files (no editor) — **deferred**
+
+Skipped for now so scoring can ship first. Bundled songs already load from assets.
 
 - [ ] ChordPro parser → song model (tempo/duration directives)
 - [ ] File picker: `.cho` / `.song.json` (+ optional audio)
@@ -296,14 +298,16 @@ Notes: metronome clicks via `just_audio` + bundled WAV assets; simple pad deferr
 
 **Exit:** drop in a `.cho`, play it.
 
-### Phase 3 — Scoring + live feedback
+### Phase 3 — Scoring + live feedback ← **сейчас**
 
-- [ ] Mic + pitch (YIN)
-- [ ] Hit windows → **Good / Early / Late / Miss** live UI
-- [ ] Result summary
-- [ ] Score on/off in settings
+- [x] Mic + pitch (YIN)
+- [x] Hit windows → **Good / Early / Late / Miss** live UI
+- [x] Result summary
+- [x] Score on/off in settings
 
 **Exit:** real guitar/mic → live feedback + score > 0.
+
+Notes: `record` PCM16 stream + `pitch_detector_dart` (YIN); match = pitch class ∈ chord tones; one grade per chord event; settings toggle via `shared_preferences`.
 
 ### Phase 4 — Polish + more platforms + audio helpers
 

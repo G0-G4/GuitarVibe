@@ -1,32 +1,65 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../audio/accompaniment.dart';
 import '../../audio/beat_clock.dart';
+import '../../audio/mic_pitch_source.dart';
 import '../../domain/play_session.dart';
+import '../../domain/score.dart';
 import '../../domain/song.dart';
 import '../library/library_providers.dart';
+import '../scoring/scoring_providers.dart';
+import '../settings/settings_providers.dart';
 
 class PlaySessionState {
   const PlaySessionState({
     required this.song,
     required this.snapshot,
     this.error,
+    this.lastHit,
+    this.liveScore,
+    this.scoringActive = false,
+    this.scoringError,
   });
 
   final Song song;
   final PlaySessionSnapshot snapshot;
   final String? error;
 
+  /// Latest hit grade for live badge.
+  final HitGrade? lastHit;
+
+  /// Running score snapshot (null if scoring inactive).
+  final SessionScore? liveScore;
+
+  /// True when mic + engine are active this session.
+  final bool scoringActive;
+
+  /// Mic/permission issue (session still plays).
+  final String? scoringError;
+
   PlaySessionState copyWith({
     Song? song,
     PlaySessionSnapshot? snapshot,
     String? error,
     bool clearError = false,
+    HitGrade? lastHit,
+    bool clearLastHit = false,
+    SessionScore? liveScore,
+    bool? scoringActive,
+    String? scoringError,
+    bool clearScoringError = false,
   }) {
     return PlaySessionState(
       song: song ?? this.song,
       snapshot: snapshot ?? this.snapshot,
       error: clearError ? null : (error ?? this.error),
+      lastHit: clearLastHit ? null : (lastHit ?? this.lastHit),
+      liveScore: liveScore ?? this.liveScore,
+      scoringActive: scoringActive ?? this.scoringActive,
+      scoringError:
+          clearScoringError ? null : (scoringError ?? this.scoringError),
     );
   }
 }
@@ -38,6 +71,9 @@ class PlaySessionController extends Notifier<PlaySessionState?> {
 
   BeatClock? _clock;
   Accompaniment? _accompaniment;
+  ScoreEngine? _scoreEngine;
+  MicPitchSource? _mic;
+  StreamSubscription<PitchSample>? _pitchSub;
   bool _musicStarted = false;
   bool _finishing = false;
   bool _disposed = false;
@@ -86,6 +122,7 @@ class PlaySessionController extends Notifier<PlaySessionState?> {
 
     final song = current.song;
     final countIn = countInBeatsFor(song);
+    final scoringWanted = ref.read(scoringEnabledProvider);
 
     try {
       final accompaniment = Accompaniment();
@@ -96,10 +133,36 @@ class PlaySessionController extends Notifier<PlaySessionState?> {
       }
 
       final clock = BeatClock(tempoBpm: song.tempoBpm);
-      // Count-in always uses the stopwatch. Audio becomes master after music starts.
       clock.onTick = _onTick;
       _clock = clock;
       _accompaniment = accompaniment;
+
+      ScoreEngine? engine;
+      String? scoringError;
+      var scoringActive = false;
+
+      if (scoringWanted) {
+        engine = ScoreEngine(song.allEvents);
+        _scoreEngine = engine;
+        try {
+          final mic = MicPitchSource();
+          await mic.start();
+          if (_disposed) {
+            await mic.dispose();
+            return;
+          }
+          _mic = mic;
+          _pitchSub = mic.pitches.listen(_onPitch);
+          scoringActive = true;
+        } catch (e) {
+          scoringError = 'Mic unavailable: $e';
+          engine = null;
+          _scoreEngine = null;
+        }
+      }
+
+      // Clear previous complete-screen score when restarting.
+      ref.read(lastSessionScoreProvider.notifier).clear();
 
       state = current.copyWith(
         snapshot: PlaySessionSnapshot(
@@ -108,12 +171,45 @@ class PlaySessionController extends Notifier<PlaySessionState?> {
           countInBeats: countIn,
         ),
         clearError: true,
+        clearLastHit: true,
+        liveScore: scoringActive ? engine?.summary : null,
+        scoringActive: scoringActive,
+        scoringError: scoringError,
+        clearScoringError: scoringError == null,
       );
 
       clock.start(startBeat: -countIn.toDouble());
     } catch (e) {
       if (_disposed) return;
       state = current.copyWith(error: 'Could not start playback: $e');
+    }
+  }
+
+  void _onPitch(PitchSample sample) {
+    if (_disposed) return;
+    final current = state;
+    if (current == null) return;
+    if (current.snapshot.status != PlayStatus.playing &&
+        current.snapshot.status != PlayStatus.countdown) {
+      return;
+    }
+
+    final engine = _scoreEngine;
+    final clock = _clock;
+    if (engine == null || clock == null) return;
+
+    final prevGrade = engine.lastGrade;
+    engine.onPitch(
+      hz: sample.hz,
+      beat: clock.currentBeat,
+      confidence: sample.confidence,
+    );
+
+    if (engine.lastGrade != prevGrade || engine.summary.total > 0) {
+      state = current.copyWith(
+        lastHit: engine.lastGrade,
+        liveScore: engine.summary,
+      );
     }
   }
 
@@ -152,11 +248,27 @@ class PlaySessionController extends Notifier<PlaySessionState?> {
     // Metronome clicks (count-in + metronome-only sessions).
     _accompaniment?.onBeat(beat);
 
+    // Score window expiry (misses).
+    final engine = _scoreEngine;
+    HitGrade? lastHit = current.lastHit;
+    SessionScore? liveScore = current.liveScore;
+    if (engine != null &&
+        (status == PlayStatus.playing || status == PlayStatus.countdown)) {
+      final prev = engine.lastGrade;
+      engine.onBeat(beat);
+      if (engine.lastGrade != prev) {
+        lastHit = engine.lastGrade;
+      }
+      liveScore = engine.summary;
+    }
+
     state = current.copyWith(
       snapshot: current.snapshot.copyWith(
         status: status,
         currentBeat: beat,
       ),
+      lastHit: lastHit,
+      liveScore: liveScore,
     );
   }
 
@@ -203,12 +315,44 @@ class PlaySessionController extends Notifier<PlaySessionState?> {
     _clock?.stop();
     _accompaniment?.stop();
 
-    state = current.copyWith(
-      snapshot: current.snapshot.copyWith(
-        status: PlayStatus.finished,
-        currentBeat: current.song.totalBeats,
-      ),
-    );
+    // Close any remaining open windows as miss.
+    final engine = _scoreEngine;
+    if (engine != null) {
+      engine.onBeat(current.song.totalBeats + 10);
+      final summary = engine.summary;
+      ref.read(lastSessionScoreProvider.notifier).setScore(summary);
+      state = current.copyWith(
+        snapshot: current.snapshot.copyWith(
+          status: PlayStatus.finished,
+          currentBeat: current.song.totalBeats,
+        ),
+        lastHit: engine.lastGrade,
+        liveScore: summary,
+      );
+    } else {
+      // Scoring off or mic failed — publish empty summary for the complete UI.
+      final wanted = ref.read(scoringEnabledProvider);
+      ref.read(lastSessionScoreProvider.notifier).setScore(
+            SessionScore(scoringEnabled: wanted),
+          );
+      state = current.copyWith(
+        snapshot: current.snapshot.copyWith(
+          status: PlayStatus.finished,
+          currentBeat: current.song.totalBeats,
+        ),
+      );
+    }
+
+    // Stop mic after publishing score.
+    unawaited(_stopMic());
+  }
+
+  Future<void> _stopMic() async {
+    await _pitchSub?.cancel();
+    _pitchSub = null;
+    final mic = _mic;
+    _mic = null;
+    await mic?.dispose();
   }
 
   Future<void> _disposeResources() async {
@@ -217,6 +361,8 @@ class PlaySessionController extends Notifier<PlaySessionState?> {
     final acc = _accompaniment;
     _accompaniment = null;
     await acc?.dispose();
+    _scoreEngine = null;
+    await _stopMic();
   }
 }
 
