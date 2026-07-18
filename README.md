@@ -35,7 +35,10 @@ From a song detail screen tap **Play**:
 4. Pause / resume / restart
 5. End screen with accuracy and hit breakdown
 
-Toggle scoring in **Settings** (library gear icon). macOS will ask for microphone access.
+Toggle scoring and **recognition mode** in **Settings** (library gear icon).  
+**Mic Lab** (waveform icon) lets you play any chord and see what the app hears.
+
+macOS will ask for microphone access.
 
 ## Roadmap (short)
 

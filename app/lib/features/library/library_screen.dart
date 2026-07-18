@@ -18,6 +18,11 @@ class LibraryScreen extends ConsumerWidget {
         centerTitle: false,
         actions: [
           IconButton(
+            tooltip: 'Mic Lab',
+            icon: const Icon(Icons.graphic_eq),
+            onPressed: () => context.push('/lab'),
+          ),
+          IconButton(
             tooltip: 'Settings',
             icon: const Icon(Icons.settings_outlined),
             onPressed: () => context.push('/settings'),

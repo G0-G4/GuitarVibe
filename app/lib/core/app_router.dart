@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 
+import '../features/lab/mic_lab_screen.dart';
 import '../features/library/library_screen.dart';
 import '../features/library/song_detail_screen.dart';
 import '../features/player/player_screen.dart';
@@ -18,6 +19,11 @@ final appRouter = GoRouter(
           path: 'settings',
           name: 'settings',
           builder: (context, state) => const SettingsScreen(),
+        ),
+        GoRoute(
+          path: 'lab',
+          name: 'lab',
+          builder: (context, state) => const MicLabScreen(),
         ),
         GoRoute(
           path: 'song/:id',

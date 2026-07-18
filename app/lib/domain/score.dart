@@ -1,7 +1,10 @@
 // Pure scoring math — no Flutter / mic imports.
 // Live feedback: Good / Early / Late / Miss per chord event.
 
+import 'chord_guess.dart';
+import 'chord_recognizer.dart';
 import 'chord_tones.dart';
+import 'recognition_mode.dart';
 import 'song.dart';
 
 /// Outcome for one scorable chord event.
@@ -138,10 +141,14 @@ class ScoreEngine {
     List<ChordEvent> songEvents, {
     this.windows = HitWindows.standard,
     this.minPitchConfidence = 0.80,
-  }) : _targets = _buildTargets(songEvents);
+    RecognitionMode mode = RecognitionMode.pitchClass,
+    ChordRecognizer? recognizer,
+  })  : _targets = _buildTargets(songEvents),
+        _recognizer = recognizer ?? ChordRecognizer(mode: mode);
 
   final HitWindows windows;
   final double minPitchConfidence;
+  final ChordRecognizer _recognizer;
 
   final List<EventScore> _targets;
   int _openIndex = 0;
@@ -152,6 +159,10 @@ class ScoreEngine {
   int _miss = 0;
   int _currentStreak = 0;
   int _maxStreak = 0;
+
+  set mode(RecognitionMode m) => _recognizer.mode = m;
+
+  RecognitionMode get mode => _recognizer.mode;
 
   static List<EventScore> _buildTargets(List<ChordEvent> events) {
     final out = <EventScore>[];
@@ -200,16 +211,29 @@ class ScoreEngine {
     }
   }
 
-  /// Feed a YIN result. [confidence] 0–1; ignored if below threshold.
+  /// Feed a YIN result (legacy / pitch modes). [confidence] 0–1.
   void onPitch({
     required double hz,
     required double beat,
     double confidence = 1.0,
   }) {
-    if (confidence < minPitchConfidence) return;
-    final pc = pitchClassFromHz(hz);
-    if (pc == null) return;
+    onFeatures(
+      AudioFeatures(
+        rms: 0.1, // above silence for pure pitch path
+        chroma: const [],
+        yinHz: hz,
+        yinConfidence: confidence,
+      ),
+      beat: beat,
+    );
+  }
 
+  /// Feed full analysis features (preferred for chroma / hybrid).
+  void onFeatures(
+    AudioFeatures features, {
+    required double beat,
+    int nowMs = 0,
+  }) {
     onBeat(beat);
     if (_openIndex >= _targets.length) return;
 
@@ -220,11 +244,29 @@ class ScoreEngine {
     final grade = gradeForDelta(delta, windows);
     if (grade == null) return; // outside window
 
-    final tones = pitchClassesForChord(t.chord);
-    if (!tones.contains(pc)) return; // wrong pitch — wait
+    // For pitch-only legacy calls with empty chroma, fall back to tone check
+    // when mode is pitch* or chroma list empty.
+    final matched = _matchTarget(t.chord, features, nowMs: nowMs);
+    if (!matched) return;
 
     _assign(_openIndex, grade, hitBeat: beat);
     _openIndex++;
+  }
+
+  bool _matchTarget(String expected, AudioFeatures f, {required int nowMs}) {
+    // Empty chroma + pitch modes: use recognizer.
+    if (f.chroma.isEmpty &&
+        (mode == RecognitionMode.chroma || mode == RecognitionMode.hybrid)) {
+      // Chroma required — can't match without it.
+      if (f.yinHz != null && (f.yinConfidence ?? 0) >= minPitchConfidence) {
+        final pc = pitchClassFromHz(f.yinHz!);
+        if (pc != null && pitchClassesForChord(expected).contains(pc)) {
+          return true; // soft fallback
+        }
+      }
+      return false;
+    }
+    return _recognizer.matchesExpected(expected, f, nowMs: nowMs);
   }
 
   void _assign(int index, HitGrade grade, {required double? hitBeat}) {
@@ -270,5 +312,6 @@ class ScoreEngine {
     _miss = 0;
     _currentStreak = 0;
     _maxStreak = 0;
+    _recognizer.reset();
   }
 }

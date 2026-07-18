@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../audio/accompaniment.dart';
 import '../../audio/beat_clock.dart';
 import '../../audio/mic_pitch_source.dart';
+import '../../domain/chord_guess.dart';
 import '../../domain/play_session.dart';
 import '../../domain/score.dart';
 import '../../domain/song.dart';
@@ -72,8 +73,8 @@ class PlaySessionController extends Notifier<PlaySessionState?> {
   BeatClock? _clock;
   Accompaniment? _accompaniment;
   ScoreEngine? _scoreEngine;
-  MicPitchSource? _mic;
-  StreamSubscription<PitchSample>? _pitchSub;
+  MicAnalysisSource? _mic;
+  StreamSubscription<AudioFeatures>? _featuresSub;
   bool _musicStarted = false;
   bool _finishing = false;
   bool _disposed = false;
@@ -123,6 +124,7 @@ class PlaySessionController extends Notifier<PlaySessionState?> {
     final song = current.song;
     final countIn = countInBeatsFor(song);
     final scoringWanted = ref.read(scoringEnabledProvider);
+    final mode = ref.read(recognitionModeProvider);
 
     try {
       final accompaniment = Accompaniment();
@@ -142,17 +144,17 @@ class PlaySessionController extends Notifier<PlaySessionState?> {
       var scoringActive = false;
 
       if (scoringWanted) {
-        engine = ScoreEngine(song.allEvents);
+        engine = ScoreEngine(song.allEvents, mode: mode);
         _scoreEngine = engine;
         try {
-          final mic = MicPitchSource();
+          final mic = MicAnalysisSource();
           await mic.start();
           if (_disposed) {
             await mic.dispose();
             return;
           }
           _mic = mic;
-          _pitchSub = mic.pitches.listen(_onPitch);
+          _featuresSub = mic.features.listen(_onFeatures);
           scoringActive = true;
         } catch (e) {
           scoringError = 'Mic unavailable: $e';
@@ -185,7 +187,7 @@ class PlaySessionController extends Notifier<PlaySessionState?> {
     }
   }
 
-  void _onPitch(PitchSample sample) {
+  void _onFeatures(AudioFeatures features) {
     if (_disposed) return;
     final current = state;
     if (current == null) return;
@@ -199,10 +201,10 @@ class PlaySessionController extends Notifier<PlaySessionState?> {
     if (engine == null || clock == null) return;
 
     final prevGrade = engine.lastGrade;
-    engine.onPitch(
-      hz: sample.hz,
+    engine.onFeatures(
+      features,
       beat: clock.currentBeat,
-      confidence: sample.confidence,
+      nowMs: DateTime.now().millisecondsSinceEpoch,
     );
 
     if (engine.lastGrade != prevGrade || engine.summary.total > 0) {
@@ -348,8 +350,8 @@ class PlaySessionController extends Notifier<PlaySessionState?> {
   }
 
   Future<void> _stopMic() async {
-    await _pitchSub?.cancel();
-    _pitchSub = null;
+    await _featuresSub?.cancel();
+    _featuresSub = null;
     final mic = _mic;
     _mic = null;
     await mic?.dispose();
