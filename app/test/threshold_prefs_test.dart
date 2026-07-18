@@ -1,5 +1,5 @@
-import 'package:chord_coach/domain/recognition_config.dart';
-import 'package:chord_coach/domain/threshold_prefs.dart';
+import 'package:guitar_vibe/domain/recognition_config.dart';
+import 'package:guitar_vibe/domain/threshold_prefs.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

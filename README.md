@@ -1,4 +1,4 @@
-# ChordCoach
+# GuitarVibe
 
 Offline-first chord play-along app (Yousician-lite): play songs by chords with timing, accompaniment, and scoring.
 

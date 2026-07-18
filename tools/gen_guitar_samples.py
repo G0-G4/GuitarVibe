@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate bundled guitar-ish samples for ChordCoach guide audio.
+"""Generate bundled guitar-ish samples for GuitarVibe guide audio.
 
 Usage (from repo root):
   python3 tools/gen_guitar_samples.py

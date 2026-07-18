@@ -1,5 +1,5 @@
-import 'package:chord_coach/domain/score.dart';
-import 'package:chord_coach/domain/song.dart';
+import 'package:guitar_vibe/domain/score.dart';
+import 'package:guitar_vibe/domain/song.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// C major triad tones: C=261.63, E=329.63, G=392.00

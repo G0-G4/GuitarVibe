@@ -17,4 +17,4 @@ cp ~/Downloads/solnce.mp3 \
   app/assets/songs/zvezda-po-imeni-solntse/audio/solnce.mp3
 ```
 
-If the file is missing, ChordCoach falls back to metronome + guitar guide.
+If the file is missing, GuitarVibe falls back to metronome + guitar guide.

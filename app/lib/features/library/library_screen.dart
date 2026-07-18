@@ -14,7 +14,7 @@ class LibraryScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('ChordCoach'),
+        title: const Text('GuitarVibe'),
         centerTitle: false,
         actions: [
           IconButton(

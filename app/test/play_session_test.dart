@@ -1,5 +1,5 @@
-import 'package:chord_coach/domain/play_session.dart';
-import 'package:chord_coach/domain/song.dart';
+import 'package:guitar_vibe/domain/play_session.dart';
+import 'package:guitar_vibe/domain/song.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Song _sampleSong({double totalBars = 2}) {

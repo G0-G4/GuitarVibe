@@ -1,4 +1,4 @@
-import 'package:chord_coach/audio/beat_clock.dart';
+import 'package:guitar_vibe/audio/beat_clock.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

@@ -1,4 +1,4 @@
-# ChordCoach app
+# GuitarVibe app
 
 Flutter application (macOS target first).
 

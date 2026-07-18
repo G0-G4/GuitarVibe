@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 
-import 'package:chord_coach/domain/chroma.dart';
+import 'package:guitar_vibe/domain/chroma.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 List<double> sine({

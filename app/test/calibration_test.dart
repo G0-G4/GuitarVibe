@@ -1,6 +1,6 @@
-import 'package:chord_coach/domain/calibration.dart';
-import 'package:chord_coach/domain/noise_suppress.dart';
-import 'package:chord_coach/domain/recognition_config.dart';
+import 'package:guitar_vibe/domain/calibration.dart';
+import 'package:guitar_vibe/domain/noise_suppress.dart';
+import 'package:guitar_vibe/domain/recognition_config.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 CalibrationFrame _frame(double rms, [double chroma = 0.1]) {

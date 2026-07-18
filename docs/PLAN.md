@@ -1,4 +1,4 @@
-# Plan: Offline Chord Coach (Yousician-lite)
+# Plan: GuitarVibe (offline chord play-along)
 
 ## Goal
 
@@ -127,7 +127,7 @@ Beat-based timeline (tempo меняется без пересчёта струк
   "schemaVersion": 1,
   "id": "training-c-g-am-f",
   "title": "Training: C–G–Am–F",
-  "artist": "ChordCoach",
+  "artist": "GuitarVibe",
   "key": "C",
   "capo": 0,
   "tempoBpm": 90,
@@ -381,6 +381,6 @@ Authored as files under `assets/songs/`, no editor.
 
 | | Default |
 |---|---|
-| App name | `ChordCoach` (можно переименовать) |
+| App name | `GuitarVibe` |
 | UI language | EN strings first |
 | Linux / Web | out of scope for now |

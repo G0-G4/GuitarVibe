@@ -11,7 +11,7 @@ No in-app editor — edit files in any text editor.
   "schemaVersion": 1,
   "id": "training-c-g-am-f",
   "title": "Training: C–G–Am–F",
-  "artist": "ChordCoach",
+  "artist": "GuitarVibe",
   "key": "C",
   "capo": 0,
   "tempoBpm": 90,
@@ -216,7 +216,7 @@ Missing tempo → default `120`. Missing duration → `4` beats.
 
 ```chordpro
 {title: Training Progression}
-{artist: ChordCoach}
+{artist: GuitarVibe}
 {key: C}
 {tempo: 90}
 {time: 4/4}

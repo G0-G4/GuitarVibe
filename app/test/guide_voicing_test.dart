@@ -1,4 +1,4 @@
-import 'package:chord_coach/domain/guide_voicing.dart';
+import 'package:guitar_vibe/domain/guide_voicing.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

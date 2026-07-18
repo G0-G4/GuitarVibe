@@ -6,16 +6,16 @@ import 'core/app_theme.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const ProviderScope(child: ChordCoachApp()));
+  runApp(const ProviderScope(child: GuitarVibeApp()));
 }
 
-class ChordCoachApp extends StatelessWidget {
-  const ChordCoachApp({super.key});
+class GuitarVibeApp extends StatelessWidget {
+  const GuitarVibeApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      title: 'ChordCoach',
+      title: 'GuitarVibe',
       debugShowCheckedModeBanner: false,
       theme: buildAppTheme(),
       routerConfig: appRouter,

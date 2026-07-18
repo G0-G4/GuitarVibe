@@ -5,10 +5,10 @@
 // 'flutter create' template.
 
 // The application's name. By default this is also the title of the Flutter window.
-PRODUCT_NAME = chord_coach
+PRODUCT_NAME = GuitarVibe
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.chordcoach.chordCoach
+PRODUCT_BUNDLE_IDENTIFIER = com.guitarvibe.GuitarVibe
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2026 com.chordcoach. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2026 GuitarVibe. All rights reserved.

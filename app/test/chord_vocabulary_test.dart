@@ -1,8 +1,8 @@
-import 'package:chord_coach/domain/chord_guess.dart';
-import 'package:chord_coach/domain/chord_recognizer.dart';
-import 'package:chord_coach/domain/chord_vocabulary.dart';
-import 'package:chord_coach/domain/chroma.dart';
-import 'package:chord_coach/domain/recognition_mode.dart';
+import 'package:guitar_vibe/domain/chord_guess.dart';
+import 'package:guitar_vibe/domain/chord_recognizer.dart';
+import 'package:guitar_vibe/domain/chord_vocabulary.dart';
+import 'package:guitar_vibe/domain/chroma.dart';
+import 'package:guitar_vibe/domain/recognition_mode.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

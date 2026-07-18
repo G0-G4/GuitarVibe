@@ -1,4 +1,4 @@
-import 'package:chord_coach/domain/song.dart';
+import 'package:guitar_vibe/domain/song.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -7,7 +7,7 @@ void main() {
       'schemaVersion': 1,
       'id': 'training-c-g-am-f',
       'title': 'Training: C–G–Am–F',
-      'artist': 'ChordCoach',
+      'artist': 'GuitarVibe',
       'key': 'C',
       'capo': 0,
       'tempoBpm': 90,

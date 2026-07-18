@@ -1,10 +1,10 @@
-# AGENTS.md — ChordCoach
+# AGENTS.md — GuitarVibe
 
 Guidance for AI coding agents working in this repository.
 
 ## What this project is
 
-**ChordCoach** — offline-first chord play-along app (Yousician-lite):
+**GuitarVibe** — offline-first chord play-along app (Yousician-lite):
 
 - Play songs by **chords** with timing UI
 - Accompaniment: **backing audio first**, metronome/synth fallback
@@ -30,7 +30,7 @@ When scope is unclear, prefer `docs/PLAN.md` over inventing features.
 
 - **Platform:** macOS only (primary dev machine). Do not add Android/iOS/Windows targets until Phase 4 unless explicitly asked.
 - **Phase:** see checklist in `docs/PLAN.md`. Complete exit criteria before jumping ahead.
-- **App code:** `app/` (Flutter package `chord_coach`)
+- **App code:** `app/` (Flutter package `guitar_vibe`)
 
 ## Stack
 

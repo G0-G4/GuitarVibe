@@ -1,5 +1,5 @@
-import 'package:chord_coach/domain/lyric_phrases.dart';
-import 'package:chord_coach/domain/song.dart';
+import 'package:guitar_vibe/domain/lyric_phrases.dart';
+import 'package:guitar_vibe/domain/song.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
