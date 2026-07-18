@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "id": "easy-a-d",
+  "title": "Easy A and D",
+  "artist": "ChordCoach · Justin-style Stage 1",
+  "key": "A",
+  "capo": 0,
+  "tempoBpm": 80,
+  "timeSignature": [4, 4],
+  "tags": ["training", "beginner", "two-chord", "A", "D", "downstrum"],
+  "audio": null,
+  "sections": [
+    {
+      "id": "pattern",
+      "name": "Downstrums (all beats)",
+      "events": [
+        {
+          "beat": 0,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "ONE two three four  (↓ ↓ ↓ ↓)"
+        },
+        {
+          "beat": 4,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "ONE two three four  (↓ ↓ ↓ ↓)"
+        },
+        {
+          "beat": 8,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 12,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "ONE two three four"
+        }
+      ]
+    },
+    {
+      "id": "hold-longer",
+      "name": "Two bars each",
+      "events": [
+        {
+          "beat": 16,
+          "durationBeats": 8,
+          "chord": "A",
+          "lyrics": "Stay on A — ONE two three four · ONE two three four"
+        },
+        {
+          "beat": 24,
+          "durationBeats": 8,
+          "chord": "D",
+          "lyrics": "Stay on D — ONE two three four · ONE two three four"
+        },
+        {
+          "beat": 32,
+          "durationBeats": 8,
+          "chord": "A",
+          "lyrics": "Back to A — keep the downstrums steady"
+        },
+        {
+          "beat": 40,
+          "durationBeats": 8,
+          "chord": "D",
+          "lyrics": "End on D — ONE two three four · ONE two three four"
+        }
+      ]
+    }
+  ],
+  "accompaniment": {
+    "style": "metronome",
+    "volume": 0.8
+  }
+}

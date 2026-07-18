@@ -62,6 +62,7 @@ flutter:
 
   assets:
     - assets/songs/index.json
+    - assets/songs/easy-a-d/
     - assets/songs/training-c-g-am-f/
     - assets/songs/swing-low/
     - assets/songs/simple-waltz/
