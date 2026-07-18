@@ -19,6 +19,7 @@ class PlaySessionState {
     required this.snapshot,
     this.error,
     this.lastHit,
+    this.lastHitEpoch = 0,
     this.liveScore,
     this.scoringActive = false,
     this.scoringError,
@@ -30,6 +31,9 @@ class PlaySessionState {
 
   /// Latest hit grade for live badge.
   final HitGrade? lastHit;
+
+  /// Bumps on every new grade so the badge re-flashes even late→late.
+  final int lastHitEpoch;
 
   /// Running score snapshot (null if scoring inactive).
   final SessionScore? liveScore;
@@ -47,6 +51,7 @@ class PlaySessionState {
     bool clearError = false,
     HitGrade? lastHit,
     bool clearLastHit = false,
+    int? lastHitEpoch,
     SessionScore? liveScore,
     bool? scoringActive,
     String? scoringError,
@@ -57,6 +62,7 @@ class PlaySessionState {
       snapshot: snapshot ?? this.snapshot,
       error: clearError ? null : (error ?? this.error),
       lastHit: clearLastHit ? null : (lastHit ?? this.lastHit),
+      lastHitEpoch: lastHitEpoch ?? this.lastHitEpoch,
       liveScore: liveScore ?? this.liveScore,
       scoringActive: scoringActive ?? this.scoringActive,
       scoringError:
@@ -205,18 +211,32 @@ class PlaySessionController extends Notifier<PlaySessionState?> {
     if (engine == null || clock == null) return;
 
     final prevGrade = engine.lastGrade;
+    final prevTotal = engine.summary.total;
+    final prevStreak = engine.summary.currentStreak;
     engine.onFeatures(
       features,
       beat: clock.currentBeat,
       nowMs: DateTime.now().millisecondsSinceEpoch,
     );
 
-    if (engine.lastGrade != prevGrade || engine.summary.total > 0) {
-      state = current.copyWith(
-        lastHit: engine.lastGrade,
-        liveScore: engine.summary,
-      );
+    final gradeChanged = engine.lastGrade != prevGrade;
+    final scoreChanged = engine.summary.total != prevTotal ||
+        engine.summary.currentStreak != prevStreak;
+    // Also push when live badge must clear (engine null, UI still showing hit).
+    final badgeStale =
+        engine.lastGrade == null && current.lastHit != null;
+    final epochChanged = engine.lastGradeEpoch != current.lastHitEpoch;
+    if (!gradeChanged && !scoreChanged && !badgeStale && !epochChanged) {
+      return;
     }
+
+    // Engine is source of truth for the badge — never keep a stale lastHit.
+    state = current.copyWith(
+      lastHit: engine.lastGrade,
+      clearLastHit: engine.lastGrade == null,
+      lastHitEpoch: engine.lastGradeEpoch,
+      liveScore: engine.summary,
+    );
   }
 
   void _onTick(double beat) {
@@ -254,17 +274,20 @@ class PlaySessionController extends Notifier<PlaySessionState?> {
     // Metronome clicks (count-in + metronome-only sessions).
     _accompaniment?.onBeat(beat);
 
-    // Score window expiry (misses).
+    // Score window expiry (misses) + clear stale live feedback flash.
     final engine = _scoreEngine;
     HitGrade? lastHit = current.lastHit;
+    var clearLastHit = false;
     SessionScore? liveScore = current.liveScore;
+    var lastHitEpoch = current.lastHitEpoch;
     if (engine != null &&
         (status == PlayStatus.playing || status == PlayStatus.countdown)) {
-      final prev = engine.lastGrade;
       engine.onBeat(beat);
-      if (engine.lastGrade != prev) {
-        lastHit = engine.lastGrade;
-      }
+      // Always sync from engine. Using current.lastHit when engine already
+      // cleared lastGrade re-stuck GOOD forever (tick/features race).
+      lastHit = engine.lastGrade;
+      clearLastHit = engine.lastGrade == null;
+      lastHitEpoch = engine.lastGradeEpoch;
       liveScore = engine.summary;
     }
 
@@ -274,6 +297,8 @@ class PlaySessionController extends Notifier<PlaySessionState?> {
         currentBeat: beat,
       ),
       lastHit: lastHit,
+      clearLastHit: clearLastHit,
+      lastHitEpoch: lastHitEpoch,
       liveScore: liveScore,
     );
   }
@@ -333,6 +358,8 @@ class PlaySessionController extends Notifier<PlaySessionState?> {
           currentBeat: current.song.totalBeats,
         ),
         lastHit: engine.lastGrade,
+        clearLastHit: engine.lastGrade == null,
+        lastHitEpoch: engine.lastGradeEpoch,
         liveScore: summary,
       );
     } else {

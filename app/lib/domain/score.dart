@@ -17,12 +17,18 @@ enum HitGrade {
 }
 
 /// Hit-window constants in beats relative to event onset (ideal).
+///
+/// Tuned for casual / non-pro play-along (chord changes, not drum-tight
+/// rhythm games). At 90 BPM one beat ≈ 667 ms:
+/// - Good ≈ −0.40…+0.55 beats (~−270…+370 ms) — slight slip is inaudible
+///   enough on harmony changes and covers mic/analysis latency.
+/// - Early / Late still grade outside Good; past [lateEnd] → Miss.
 class HitWindows {
   const HitWindows({
-    this.earlyStart = -0.50,
-    this.goodStart = -0.15,
-    this.goodEnd = 0.30,
-    this.lateEnd = 0.75,
+    this.earlyStart = -0.70,
+    this.goodStart = -0.40,
+    this.goodEnd = 0.55,
+    this.lateEnd = 1.05,
   });
 
   /// First beat where early hits are accepted (delta from ideal).
@@ -156,12 +162,43 @@ class ScoreEngine {
   final List<EventScore> _targets;
   int _openIndex = 0;
   HitGrade? lastGrade;
+
+  /// Increments on every grade assign so the UI can re-flash even late→late.
+  int lastGradeEpoch = 0;
+
   int _good = 0;
   int _early = 0;
   int _late = 0;
   int _miss = 0;
   int _currentStreak = 0;
   int _maxStreak = 0;
+
+  /// Beat at which [lastGrade] was assigned (for brief UI flash, then clear).
+  double? _lastGradeAtBeat;
+
+  /// Index in [_targets] that produced [lastGrade].
+  int? _lastGradedTargetIndex;
+
+  /// After a successful hit, block immediate re-triggers (see onFeatures).
+  bool _awaitingMatchGap = false;
+
+  /// Consecutive matching analysis frames for the open target.
+  /// Single-frame noise / metronome bleed must not free-score as Good.
+  int _matchStreak = 0;
+
+  /// Beat of the first frame in the current match streak (timing source).
+  /// Grading from the *last* frame pushed on-time hits into Late after
+  /// multi-frame confirmation + analysis lag.
+  double? _matchStartBeat;
+
+  /// How long (in beats) to keep last feedback before returning to "Listen…".
+  static const double lastGradeHoldBeats = 0.75;
+
+  /// Min beats after a hit before another event may be graded.
+  static const double minRetriggerBeats = 0.12;
+
+  /// Frames that must match in a row before a hit is accepted.
+  static const int requiredMatchFrames = 2;
 
   set mode(RecognitionMode m) => _recognizer.mode = m;
 
@@ -206,11 +243,33 @@ class ScoreEngine {
       }
       final lateEdge = t.idealBeat + windows.lateEnd;
       if (beat > lateEdge) {
-        _assign(_openIndex, HitGrade.miss, hitBeat: null);
+        _assign(_openIndex, HitGrade.miss, hitBeat: null, atBeat: beat);
         _openIndex++;
         continue;
       }
       break;
+    }
+    _maybeClearStaleLastGrade(beat);
+  }
+
+  /// Drop sticky live feedback once the flash window ends or the next
+  /// opportunity opens — otherwise UI keeps showing the previous Good forever.
+  void _maybeClearStaleLastGrade(double beat) {
+    if (lastGrade == null || _lastGradeAtBeat == null) return;
+
+    if (beat - _lastGradeAtBeat! >= lastGradeHoldBeats) {
+      lastGrade = null;
+      return;
+    }
+
+    // Entering the early window of a later ungraded target → wait for new hit.
+    if (_openIndex < _targets.length &&
+        _lastGradedTargetIndex != null &&
+        _openIndex > _lastGradedTargetIndex!) {
+      final next = _targets[_openIndex];
+      if (!next.isGraded && beat >= next.idealBeat + windows.earlyStart) {
+        lastGrade = null;
+      }
     }
   }
 
@@ -231,6 +290,11 @@ class ScoreEngine {
     );
   }
 
+  void _resetMatchStreak() {
+    _matchStreak = 0;
+    _matchStartBeat = null;
+  }
+
   /// Feed full analysis features (preferred for chroma / hybrid).
   void onFeatures(
     AudioFeatures features, {
@@ -243,16 +307,54 @@ class ScoreEngine {
     final t = _targets[_openIndex];
     if (t.isGraded) return;
 
-    final delta = beat - t.idealBeat;
-    final grade = gradeForDelta(delta, windows);
-    if (grade == null) return; // outside window
+    // After a hit: short debounce, then extra protection when the next target
+    // is the *same* chord (ring-out would otherwise free-score as Good).
+    // Different next chords re-arm after the debounce only — shared tones
+    // (C→G both contain G) must not block forever.
+    if (_awaitingMatchGap) {
+      final sinceHit = beat - (_lastGradeAtBeat ?? beat);
+      if (sinceHit < minRetriggerBeats) {
+        _resetMatchStreak();
+        return;
+      }
 
-    // For pitch-only legacy calls with empty chroma, fall back to tone check
-    // when mode is pitch* or chroma list empty.
+      final prevIdx = _lastGradedTargetIndex;
+      final sameAsPrev = prevIdx != null &&
+          prevIdx < _targets.length &&
+          _targets[prevIdx].chord == t.chord;
+      if (sameAsPrev) {
+        final stillMatching = _matchTarget(t.chord, features, nowMs: nowMs);
+        if (stillMatching) {
+          _resetMatchStreak();
+          return; // need a gap in the sound
+        }
+      }
+      _awaitingMatchGap = false;
+      _resetMatchStreak();
+    }
+
     final matched = _matchTarget(t.chord, features, nowMs: nowMs);
-    if (!matched) return;
+    if (!matched) {
+      _resetMatchStreak();
+      return;
+    }
 
-    _assign(_openIndex, grade, hitBeat: beat);
+    // Start / continue streak only while the *onset* (first frame) is inside
+    // an open timing window. Grade from that first beat, not the confirm frame.
+    _matchStartBeat ??= beat;
+    final hitBeat = _matchStartBeat!;
+    final grade = gradeForDelta(hitBeat - t.idealBeat, windows);
+    if (grade == null) {
+      // First frame was outside the window — drop and wait for a real onset.
+      _resetMatchStreak();
+      return;
+    }
+
+    _matchStreak++;
+    if (_matchStreak < requiredMatchFrames) return;
+
+    _resetMatchStreak();
+    _assign(_openIndex, grade, hitBeat: hitBeat, atBeat: beat);
     _openIndex++;
   }
 
@@ -272,12 +374,24 @@ class ScoreEngine {
     return _recognizer.matchesExpected(expected, f, nowMs: nowMs);
   }
 
-  void _assign(int index, HitGrade grade, {required double? hitBeat}) {
+  void _assign(
+    int index,
+    HitGrade grade, {
+    required double? hitBeat,
+    required double atBeat,
+  }) {
     final prev = _targets[index];
     if (prev.isGraded) return;
 
     _targets[index] = prev.copyWith(grade: grade, hitBeat: hitBeat);
     lastGrade = grade;
+    lastGradeEpoch++;
+    _lastGradedTargetIndex = index;
+    // Use assign-time beat so miss/late flash is not immediately cleared.
+    _lastGradeAtBeat = atBeat;
+
+    // Only successful hits leave residual audio that can false-trigger next.
+    _awaitingMatchGap = grade != HitGrade.miss;
 
     switch (grade) {
       case HitGrade.good:
@@ -309,6 +423,11 @@ class ScoreEngine {
     }
     _openIndex = 0;
     lastGrade = null;
+    lastGradeEpoch = 0;
+    _lastGradeAtBeat = null;
+    _lastGradedTargetIndex = null;
+    _awaitingMatchGap = false;
+    _resetMatchStreak();
     _good = 0;
     _early = 0;
     _late = 0;

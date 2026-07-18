@@ -129,6 +129,7 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                         LiveFeedbackBadge(
                           grade: session?.lastHit,
                           streak: session?.liveScore?.currentStreak ?? 0,
+                          epoch: session?.lastHitEpoch ?? 0,
                         ),
                       ],
                       const SizedBox(height: 12),

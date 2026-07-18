@@ -8,10 +8,14 @@ class LiveFeedbackBadge extends StatelessWidget {
     super.key,
     required this.grade,
     this.streak = 0,
+    this.epoch = 0,
   });
 
   final HitGrade? grade;
   final int streak;
+
+  /// Unique id per grade event so late→late still re-animates.
+  final int epoch;
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +43,7 @@ class LiveFeedbackBadge extends StatelessWidget {
         child: AnimatedSwitcher(
           duration: const Duration(milliseconds: 120),
           child: Row(
-            key: ValueKey('${grade!.name}-$streak'),
+            key: ValueKey('${grade!.name}-$streak-$epoch'),
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
