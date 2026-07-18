@@ -2,29 +2,39 @@
   "schemaVersion": 1,
   "id": "easy-a-d",
   "title": "Easy A and D",
-  "artist": "ChordCoach · Justin-style Stage 1",
+  "artist": "ChordCoach \u00b7 Justin-style Stage 1",
   "key": "A",
   "capo": 0,
   "tempoBpm": 80,
-  "timeSignature": [4, 4],
-  "tags": ["training", "beginner", "two-chord", "A", "D", "downstrum"],
+  "timeSignature": [
+    4,
+    4
+  ],
+  "tags": [
+    "training",
+    "beginner",
+    "two-chord",
+    "A",
+    "D",
+    "downstrum"
+  ],
   "audio": null,
   "sections": [
     {
       "id": "pattern",
-      "name": "Downstrums (all beats)",
+      "name": "Downstrums \u00b7 5 min (A \u2194 D every bar)",
       "events": [
         {
           "beat": 0,
           "durationBeats": 4,
           "chord": "A",
-          "lyrics": "ONE two three four  (↓ ↓ ↓ ↓)"
+          "lyrics": "ONE two three four  (\u2193 \u2193 \u2193 \u2193)"
         },
         {
           "beat": 4,
           "durationBeats": 4,
           "chord": "D",
-          "lyrics": "ONE two three four  (↓ ↓ ↓ ↓)"
+          "lyrics": "ONE two three four  (\u2193 \u2193 \u2193 \u2193)"
         },
         {
           "beat": 8,
@@ -37,36 +47,582 @@
           "durationBeats": 4,
           "chord": "D",
           "lyrics": "ONE two three four"
-        }
-      ]
-    },
-    {
-      "id": "hold-longer",
-      "name": "Two bars each",
-      "events": [
+        },
         {
           "beat": 16,
-          "durationBeats": 8,
+          "durationBeats": 4,
           "chord": "A",
-          "lyrics": "Stay on A — ONE two three four · ONE two three four"
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 20,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "ONE two three four"
         },
         {
           "beat": 24,
-          "durationBeats": 8,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 28,
+          "durationBeats": 4,
           "chord": "D",
-          "lyrics": "Stay on D — ONE two three four · ONE two three four"
+          "lyrics": "ONE two three four"
         },
         {
           "beat": 32,
-          "durationBeats": 8,
+          "durationBeats": 4,
           "chord": "A",
-          "lyrics": "Back to A — keep the downstrums steady"
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 36,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "ONE two three four"
         },
         {
           "beat": 40,
-          "durationBeats": 8,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 44,
+          "durationBeats": 4,
           "chord": "D",
-          "lyrics": "End on D — ONE two three four · ONE two three four"
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 48,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 52,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 56,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 60,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 64,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "Bar 17/100 \u2014 still A \u2194 D every bar"
+        },
+        {
+          "beat": 68,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 72,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 76,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 80,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 84,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 88,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 92,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 96,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 100,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 104,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 108,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 112,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 116,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 120,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 124,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 128,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "Bar 33/100 \u2014 still A \u2194 D every bar"
+        },
+        {
+          "beat": 132,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 136,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 140,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 144,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 148,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 152,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 156,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 160,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 164,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 168,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 172,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 176,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 180,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 184,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 188,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 192,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "Bar 49/100 \u2014 still A \u2194 D every bar"
+        },
+        {
+          "beat": 196,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 200,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 204,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 208,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 212,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 216,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 220,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 224,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 228,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 232,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 236,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 240,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 244,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 248,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 252,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 256,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "Bar 65/100 \u2014 still A \u2194 D every bar"
+        },
+        {
+          "beat": 260,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 264,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 268,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 272,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 276,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 280,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 284,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 288,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 292,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 296,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 300,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 304,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 308,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 312,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 316,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 320,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "Bar 81/100 \u2014 still A \u2194 D every bar"
+        },
+        {
+          "beat": 324,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 328,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 332,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 336,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 340,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 344,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 348,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 352,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 356,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 360,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 364,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 368,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 372,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 376,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 380,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 384,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "Bar 97/100 \u2014 still A \u2194 D every bar"
+        },
+        {
+          "beat": 388,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 392,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "ONE two three four"
+        },
+        {
+          "beat": 396,
+          "durationBeats": 4,
+          "chord": "D",
+          "lyrics": "Last bar \u2014 keep the downstrums steady"
         }
       ]
     }

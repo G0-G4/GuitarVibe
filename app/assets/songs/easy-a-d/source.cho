@@ -4,21 +4,13 @@
 {tempo: 80}
 {time: 4/4}
 {duration: 4}
-{comment: Downstrum every beat: ONE two three four (↓ ↓ ↓ ↓). Same idea as Justin Guitar Stage 1 open-chord practice — only A and D.}
+{comment: Downstrum every beat: ONE two three four (↓ ↓ ↓ ↓). Justin-style Stage 1 — only A and D.}
+{comment: Canonical runtime is song.json: one bar each A↔D for 5 minutes (100 bars @ 80 BPM). This .cho is the pattern template only.}
 
 {start_of_verse}
-{comment: Pattern — one bar each}
+{comment: Pattern — one bar each (repeat for 5 min in song.json)}
 [A]ONE two three four  (↓ ↓ ↓ ↓)
 [D]ONE two three four  (↓ ↓ ↓ ↓)
 [A]ONE two three four
 [D]ONE two three four
-{end_of_verse}
-
-{start_of_verse}
-{comment: Two bars each — slower changes}
-{duration: 8}
-[A]Stay on A — ONE two three four · ONE two three four
-[D]Stay on D — ONE two three four · ONE two three four
-[A]Back to A — keep the downstrums steady
-[D]End on D — ONE two three four · ONE two three four
 {end_of_verse}
