@@ -5,6 +5,7 @@ import '../features/library/library_screen.dart';
 import '../features/library/song_detail_screen.dart';
 import '../features/player/player_screen.dart';
 import '../features/player/session_complete_screen.dart';
+import '../features/settings/chord_vocabulary_screen.dart';
 import '../features/settings/settings_screen.dart';
 
 final appRouter = GoRouter(
@@ -19,6 +20,13 @@ final appRouter = GoRouter(
           path: 'settings',
           name: 'settings',
           builder: (context, state) => const SettingsScreen(),
+          routes: [
+            GoRoute(
+              path: 'chords',
+              name: 'chords',
+              builder: (context, state) => const ChordVocabularyScreen(),
+            ),
+          ],
         ),
         GoRoute(
           path: 'lab',

@@ -15,6 +15,12 @@ class SettingsScreen extends ConsumerWidget {
     return 'Test recognition & calibrate ($room · $g)';
   }
 
+  static String _chordsSubtitle(WidgetRef ref) {
+    final v = ref.watch(chordVocabularyProvider);
+    if (!v.enabled) return 'Filter off — full vocabulary';
+    return 'On · ${v.symbols.length} chords';
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final scoringEnabled = ref.watch(scoringEnabledProvider);
@@ -83,6 +89,18 @@ class SettingsScreen extends ConsumerWidget {
                   : null,
             ),
           const Divider(height: 1),
+          ListTile(
+            leading: const Icon(Icons.library_music_outlined),
+            title: const Text('My chords'),
+            subtitle: Text(
+              _chordsSubtitle(ref),
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push('/settings/chords'),
+          ),
           ListTile(
             leading: const Icon(Icons.graphic_eq),
             title: const Text('Mic Lab'),

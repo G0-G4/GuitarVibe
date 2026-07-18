@@ -11,10 +11,14 @@ class ChordRecognizer {
   ChordRecognizer({
     this.mode = RecognitionMode.chroma,
     this.config = RecognitionConfig.standard,
+    this.allowedSymbols,
   });
 
   RecognitionMode mode;
   RecognitionConfig config;
+
+  /// When non-null and non-empty, free chroma ranking is limited to these chords.
+  Set<String>? allowedSymbols;
 
   // Hold filter state (pitchClassHeld).
   int? _holdPc;
@@ -195,7 +199,11 @@ class ChordRecognizer {
       );
     }
 
-    final ranked = rankChromaMatches(f.chroma, topK: 5);
+    final ranked = rankChromaMatches(
+      f.chroma,
+      topK: 5,
+      allowedSymbols: allowedSymbols,
+    );
     if (ranked.isEmpty) {
       _chromaHoldSymbol = null;
       return empty;
@@ -203,6 +211,10 @@ class ChordRecognizer {
 
     final best = ranked.first;
     final second = ranked.length > 1 ? ranked[1].score : 0.0;
+    // Smaller sets are less ambiguous — ease margin slightly.
+    final marginNeed = (allowedSymbols != null && allowedSymbols!.length <= 8)
+        ? config.chromaMargin * 0.5
+        : config.chromaMargin;
     final margin = best.score - second;
     final top = [
       for (final r in ranked) RankedChord(symbol: r.symbol, score: r.score),
@@ -225,7 +237,7 @@ class ChordRecognizer {
             '(top ${best.symbol})',
       );
     }
-    if (margin < config.chromaMargin) {
+    if (margin < marginNeed) {
       _chromaHoldSymbol = null;
       final alt = ranked.length > 1 ? ranked[1].symbol : '?';
       return ChordGuess(
@@ -239,7 +251,7 @@ class ChordRecognizer {
         blockReason:
             'Ambiguous: ${best.symbol} vs $alt '
             '(margin ${margin.toStringAsFixed(2)} < '
-            '${config.chromaMargin.toStringAsFixed(2)})',
+            '${marginNeed.toStringAsFixed(2)})',
       );
     }
 

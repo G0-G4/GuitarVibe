@@ -6,6 +6,7 @@ import '../../audio/mic_pitch_source.dart';
 import '../../domain/calibration.dart';
 import '../../domain/chord_guess.dart';
 import '../../domain/chord_recognizer.dart';
+import '../../domain/chord_vocabulary.dart';
 import '../../domain/recognition_config.dart';
 import '../../domain/recognition_mode.dart';
 import '../settings/settings_providers.dart';
@@ -28,6 +29,7 @@ class MicLabState {
     this.calMessage,
     this.calError,
     this.config = RecognitionConfig.balanced,
+    this.vocabulary = ChordVocabulary.empty,
   });
 
   final bool listening;
@@ -40,6 +42,7 @@ class MicLabState {
   final String? calMessage;
   final String? calError;
   final RecognitionConfig config;
+  final ChordVocabulary vocabulary;
 
   bool get isCalibrating => calPhase != CalibrationPhase.idle;
 
@@ -57,6 +60,7 @@ class MicLabState {
     String? calError,
     bool clearCalError = false,
     RecognitionConfig? config,
+    ChordVocabulary? vocabulary,
   }) {
     return MicLabState(
       listening: listening ?? this.listening,
@@ -69,6 +73,7 @@ class MicLabState {
       calMessage: clearCalMessage ? null : (calMessage ?? this.calMessage),
       calError: clearCalError ? null : (calError ?? this.calError),
       config: config ?? this.config,
+      vocabulary: vocabulary ?? this.vocabulary,
     );
   }
 }
@@ -89,7 +94,12 @@ class MicLabController extends Notifier<MicLabState> {
     final mode = ref.read(recognitionModeProvider);
     final cal = ref.read(calibrationProvider);
     final config = ref.read(effectiveRecognitionConfigProvider);
-    _recognizer = ChordRecognizer(mode: mode, config: config);
+    final vocab = ref.read(chordVocabularyProvider);
+    _recognizer = ChordRecognizer(
+      mode: mode,
+      config: config,
+      allowedSymbols: vocab.allowedSymbolsOrNull,
+    );
 
     ref.listen<RecognitionMode>(recognitionModeProvider, (prev, next) {
       if (_disposed) return;
@@ -115,6 +125,13 @@ class MicLabController extends Notifier<MicLabState> {
       state = state.copyWith(config: cfg);
     });
 
+    ref.listen<ChordVocabulary>(chordVocabularyProvider, (prev, next) {
+      if (_disposed) return;
+      _recognizer.allowedSymbols = next.allowedSymbolsOrNull;
+      _recognizer.reset();
+      state = state.copyWith(vocabulary: next);
+    });
+
     ref.onDispose(() {
       _disposed = true;
       unawaited(_stop());
@@ -126,6 +143,7 @@ class MicLabController extends Notifier<MicLabState> {
       mode: mode,
       calibration: cal,
       config: config,
+      vocabulary: vocab,
     );
   }
 
@@ -137,8 +155,10 @@ class MicLabController extends Notifier<MicLabState> {
     final mode = ref.read(recognitionModeProvider);
     final cal = ref.read(calibrationProvider);
     final config = ref.read(effectiveRecognitionConfigProvider);
+    final vocab = ref.read(chordVocabularyProvider);
     _recognizer.mode = mode;
     _recognizer.config = config;
+    _recognizer.allowedSymbols = vocab.allowedSymbolsOrNull;
     _recognizer.reset();
 
     try {
@@ -161,6 +181,7 @@ class MicLabController extends Notifier<MicLabState> {
         mode: mode,
         calibration: cal,
         config: config,
+        vocabulary: vocab,
         guess: ChordGuess.silence,
       );
     } catch (e) {

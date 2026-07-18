@@ -148,32 +148,59 @@ const freeRecognitionQualities = <({String suffix, List<int> intervals})>[
 /// Rank recognition vocabulary chords by chroma cosine similarity.
 ///
 /// Uses a restricted quality set for free lab; [qualities] can override.
+/// When [allowedSymbols] is non-null and non-empty, only those chords are scored.
 List<({String symbol, double score})> rankChromaMatches(
   List<double> chroma, {
   int topK = 5,
   List<({String suffix, List<int> intervals})>? qualities,
+  Set<String>? allowedSymbols,
 }) {
   if (chroma.length != 12) return const [];
 
-  final qs = qualities ?? freeRecognitionQualities;
   final scored = <({String symbol, double score})>[];
-  for (var root = 0; root < 12; root++) {
-    for (final q in qs) {
-      final template = List<double>.filled(12, 0);
-      // Emphasize root slightly — helps vs noise / inversion ambiguity.
-      for (var i = 0; i < q.intervals.length; i++) {
-        final iv = q.intervals[i];
-        template[(root + iv) % 12] = i == 0 ? 1.2 : 1.0;
+
+  if (allowedSymbols != null && allowedSymbols.isNotEmpty) {
+    for (final raw in allowedSymbols) {
+      final symbol = normalizeChordSymbol(raw);
+      if (symbol.isEmpty || isNoChord(symbol)) continue;
+      final template = _templateForSymbol(symbol);
+      if (template == null) continue;
+      final score = cosineSimilarity(chroma, l2Normalize(template));
+      scored.add((symbol: symbol, score: score));
+    }
+  } else {
+    final qs = qualities ?? freeRecognitionQualities;
+    for (var root = 0; root < 12; root++) {
+      for (final q in qs) {
+        final template = List<double>.filled(12, 0);
+        // Emphasize root slightly — helps vs noise / inversion ambiguity.
+        for (var i = 0; i < q.intervals.length; i++) {
+          final iv = q.intervals[i];
+          template[(root + iv) % 12] = i == 0 ? 1.2 : 1.0;
+        }
+        final tNorm = l2Normalize(template);
+        final score = cosineSimilarity(chroma, tNorm);
+        scored.add((symbol: chordSymbol(root, q.suffix), score: score));
       }
-      final tNorm = l2Normalize(template);
-      final score = cosineSimilarity(chroma, tNorm);
-      scored.add((symbol: chordSymbol(root, q.suffix), score: score));
     }
   }
 
   scored.sort((a, b) => b.score.compareTo(a.score));
   if (scored.length <= topK) return scored;
   return scored.sublist(0, topK);
+}
+
+/// Binary-ish template with root emphasis for a chord symbol.
+List<double>? _templateForSymbol(String symbol) {
+  final parsed = parseChord(symbol);
+  if (parsed == null) return null;
+  final intervals = intervalsForQuality(parsed.quality);
+  if (intervals.isEmpty) return null;
+  final template = List<double>.filled(12, 0);
+  for (var i = 0; i < intervals.length; i++) {
+    template[(parsed.root + intervals[i]) % 12] = i == 0 ? 1.2 : 1.0;
+  }
+  return template;
 }
 
 /// Similarity of observed chroma to the expected chord's template.

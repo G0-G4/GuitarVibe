@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../domain/calibration.dart';
+import '../../domain/chord_tones.dart';
+import '../../domain/chord_vocabulary.dart';
 import '../../domain/recognition_config.dart';
 import '../../domain/recognition_mode.dart';
 import '../../domain/threshold_prefs.dart';
@@ -12,6 +14,7 @@ const _scoringEnabledKey = 'scoringEnabled';
 const _recognitionModeKey = 'recognitionMode';
 const _calibrationKey = 'calibration.v1';
 const _thresholdPrefsKey = 'thresholdPrefs.v1';
+const _chordVocabularyKey = 'chordVocabulary.v1';
 
 /// Whether mic scoring is enabled (persisted). Default: true.
 class ScoringEnabledNotifier extends Notifier<bool> {
@@ -219,3 +222,68 @@ final effectiveRecognitionConfigProvider = Provider<RecognitionConfig>((ref) {
   final applied = prefs.applyTo(base);
   return applied.copyWith(requireYinForHybrid: prefs.requireYinForHybrid);
 });
+
+/// User practice chord set for free recognition.
+class ChordVocabularyNotifier extends Notifier<ChordVocabulary> {
+  @override
+  ChordVocabulary build() {
+    Future.microtask(_load);
+    return ChordVocabulary.empty;
+  }
+
+  Future<void> _load() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_chordVocabularyKey);
+    if (raw == null || raw.isEmpty) {
+      state = ChordVocabulary.empty;
+      return;
+    }
+    try {
+      final map = jsonDecode(raw) as Map<String, dynamic>;
+      state = ChordVocabulary.fromJson(map);
+    } catch (_) {
+      state = ChordVocabulary.empty;
+    }
+  }
+
+  Future<void> _save() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_chordVocabularyKey, jsonEncode(state.toJson()));
+  }
+
+  Future<void> setVocabulary(ChordVocabulary next) async {
+    // Keep at least one chord when filter is on.
+    if (next.enabled && next.symbols.isEmpty) {
+      next = next.copyWith(symbols: ChordVocabulary.beginner);
+    }
+    state = next;
+    await _save();
+  }
+
+  Future<void> setEnabled(bool enabled) async {
+    await setVocabulary(state.copyWith(enabled: enabled));
+  }
+
+  Future<void> toggleSymbol(String symbol) async {
+    var next = state.withToggled(symbol);
+    if (next.enabled && next.symbols.isEmpty) {
+      // Don't allow empty set while enabled — re-add.
+      next = next.copyWith(symbols: {normalizeChordSymbol(symbol)});
+    }
+    await setVocabulary(next);
+  }
+
+  Future<void> applyPreset(Set<String> preset) async {
+    await setVocabulary(state.applyPreset(preset, enable: true));
+  }
+
+  Future<void> reset() async {
+    state = ChordVocabulary.empty;
+    await _save();
+  }
+}
+
+final chordVocabularyProvider =
+    NotifierProvider<ChordVocabularyNotifier, ChordVocabulary>(
+  ChordVocabularyNotifier.new,
+);

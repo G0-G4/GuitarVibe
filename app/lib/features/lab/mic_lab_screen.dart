@@ -86,7 +86,22 @@ class MicLabScreen extends ConsumerWidget {
               onReset: () =>
                   ref.read(thresholdPrefsProvider.notifier).reset(),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.library_music_outlined),
+              title: const Text('My chords'),
+              subtitle: Text(
+                lab.vocabulary.enabled
+                    ? 'Filter on · ${lab.vocabulary.sorted.join(' · ')}'
+                    : 'Filter off — full vocabulary',
+              ),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: lab.isCalibrating
+                  ? null
+                  : () => context.push('/settings/chords'),
+            ),
+            const SizedBox(height: 8),
             Text(
               'Recognition mode',
               style: theme.textTheme.labelLarge,
