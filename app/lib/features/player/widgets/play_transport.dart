@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../../domain/accompaniment_mode.dart';
 import '../../../domain/play_session.dart';
 import '../../../domain/song.dart';
+import 'accompaniment_mode_picker.dart';
 
 class PlayTransport extends StatefulWidget {
   const PlayTransport({
@@ -10,7 +12,11 @@ class PlayTransport extends StatefulWidget {
     required this.snapshot,
     required this.effectiveTempoBpm,
     required this.metronomeVolume,
-    required this.guideVolume,
+    required this.secondaryVolume,
+    required this.usesAudioMaster,
+    required this.accompanimentMode,
+    required this.audioOffsetSec,
+    required this.isOffsetOverridden,
     required this.onPause,
     required this.onResume,
     required this.onRestart,
@@ -19,8 +25,11 @@ class PlayTransport extends StatefulWidget {
     required this.onResetTempo,
     required this.onMetronomeVolume,
     required this.onToggleMetronomeMute,
-    required this.onGuideVolume,
-    required this.onToggleGuideMute,
+    required this.onSecondaryVolume,
+    required this.onToggleSecondaryMute,
+    required this.onAccompanimentMode,
+    required this.onNudgeOffset,
+    required this.onResetOffset,
   });
 
   final Song song;
@@ -30,8 +39,19 @@ class PlayTransport extends StatefulWidget {
   /// Metronome click gain 0–1 (0 = fully off).
   final double metronomeVolume;
 
-  /// Guitar guide (pad + strum) gain 0–1 (0 = fully off).
-  final double guideVolume;
+  /// Guide volume (synth) or Track volume (recording), depending on mode.
+  final double secondaryVolume;
+
+  /// True when the session plays a real backing track as master clock.
+  final bool usesAudioMaster;
+
+  /// Preferred / selected accompaniment mode (only when song has audio).
+  final AccompanimentMode accompanimentMode;
+
+  /// Session media offset (sec) for beat 0.
+  final double audioOffsetSec;
+
+  final bool isOffsetOverridden;
 
   final VoidCallback onPause;
   final VoidCallback onResume;
@@ -41,8 +61,11 @@ class PlayTransport extends StatefulWidget {
   final VoidCallback onResetTempo;
   final ValueChanged<double> onMetronomeVolume;
   final VoidCallback onToggleMetronomeMute;
-  final ValueChanged<double> onGuideVolume;
-  final VoidCallback onToggleGuideMute;
+  final ValueChanged<double> onSecondaryVolume;
+  final VoidCallback onToggleSecondaryMute;
+  final ValueChanged<AccompanimentMode> onAccompanimentMode;
+  final ValueChanged<double> onNudgeOffset;
+  final VoidCallback onResetOffset;
 
   @override
   State<PlayTransport> createState() => _PlayTransportState();
@@ -93,6 +116,10 @@ class _PlayTransportState extends State<PlayTransport> {
     final effective = widget.effectiveTempoBpm.round();
     final songBpm = song.tempoBpm.round();
 
+    final secondaryLabel = widget.usesAudioMaster ? 'Track' : 'Guide';
+    final secondaryIcon =
+        widget.usesAudioMaster ? Icons.audiotrack : Icons.queue_music;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -128,14 +155,34 @@ class _PlayTransportState extends State<PlayTransport> {
           ),
         ),
         const SizedBox(height: 8),
+        if (song.hasAudio) ...[
+          AccompanimentModePicker(
+            mode: widget.accompanimentMode,
+            compact: true,
+            enabled: _canControl,
+            onChanged: widget.onAccompanimentMode,
+          ),
+          const SizedBox(height: 8),
+        ],
         _TempoRow(
           effectiveBpm: effective,
           songBpm: songBpm,
           isOverridden: _isTempoOverridden,
           enabled: _canControl,
+          isMapMode: widget.usesAudioMaster,
           onNudge: widget.onNudgeTempo,
           onReset: widget.onResetTempo,
         ),
+        if (widget.usesAudioMaster) ...[
+          const SizedBox(height: 6),
+          _OffsetRow(
+            offsetSec: widget.audioOffsetSec,
+            isOverridden: widget.isOffsetOverridden,
+            enabled: _canControl,
+            onNudge: widget.onNudgeOffset,
+            onReset: widget.onResetOffset,
+          ),
+        ],
         const SizedBox(height: 8),
         _VolumeRow(
           label: 'Click',
@@ -148,14 +195,18 @@ class _PlayTransportState extends State<PlayTransport> {
           onToggleMute: widget.onToggleMetronomeMute,
         ),
         _VolumeRow(
-          label: 'Guide',
-          volume: widget.guideVolume,
+          label: secondaryLabel,
+          volume: widget.secondaryVolume,
           enabled: _canControl,
-          muteTooltip: 'Mute guitar guide',
-          unmuteTooltip: 'Unmute guitar guide',
-          activeIcon: Icons.queue_music,
-          onChanged: widget.onGuideVolume,
-          onToggleMute: widget.onToggleGuideMute,
+          muteTooltip: widget.usesAudioMaster
+              ? 'Mute track'
+              : 'Mute guitar guide',
+          unmuteTooltip: widget.usesAudioMaster
+              ? 'Unmute track'
+              : 'Unmute guitar guide',
+          activeIcon: secondaryIcon,
+          onChanged: widget.onSecondaryVolume,
+          onToggleMute: widget.onToggleSecondaryMute,
         ),
         const SizedBox(height: 12),
         Row(
@@ -187,6 +238,7 @@ class _TempoRow extends StatelessWidget {
     required this.songBpm,
     required this.isOverridden,
     required this.enabled,
+    required this.isMapMode,
     required this.onNudge,
     required this.onReset,
   });
@@ -195,15 +247,20 @@ class _TempoRow extends StatelessWidget {
   final int songBpm;
   final bool isOverridden;
   final bool enabled;
+  final bool isMapMode;
   final ValueChanged<double> onNudge;
   final VoidCallback onReset;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final label = isOverridden
-        ? '$effectiveBpm BPM · song $songBpm'
-        : '$effectiveBpm BPM';
+    final label = isMapMode
+        ? (isOverridden
+            ? '$effectiveBpm map · song $songBpm'
+            : '$effectiveBpm BPM · chart map')
+        : (isOverridden
+            ? '$effectiveBpm BPM · song $songBpm'
+            : '$effectiveBpm BPM');
 
     return Column(
       children: [
@@ -216,6 +273,16 @@ class _TempoRow extends StatelessWidget {
                 : theme.colorScheme.onSurfaceVariant,
           ),
         ),
+        if (isMapMode) ...[
+          const SizedBox(height: 2),
+          Text(
+            'Sync chart to track (does not speed up the recording)',
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
         const SizedBox(height: 4),
         Wrap(
           alignment: WrapAlignment.center,
@@ -241,6 +308,78 @@ class _TempoRow extends StatelessWidget {
             _TempoChip(
               label: '+10',
               onPressed: enabled ? () => onNudge(10) : null,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _OffsetRow extends StatelessWidget {
+  const _OffsetRow({
+    required this.offsetSec,
+    required this.isOverridden,
+    required this.enabled,
+    required this.onNudge,
+    required this.onReset,
+  });
+
+  final double offsetSec;
+  final bool isOverridden;
+  final bool enabled;
+  final ValueChanged<double> onNudge;
+  final VoidCallback onReset;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final ms = (offsetSec * 1000).round();
+
+    return Column(
+      children: [
+        Text(
+          'Offset $ms ms',
+          textAlign: TextAlign.center,
+          style: theme.textTheme.labelMedium?.copyWith(
+            color: isOverridden
+                ? theme.colorScheme.primary
+                : theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          'Shift beat 0 vs the recording',
+          textAlign: TextAlign.center,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Wrap(
+          alignment: WrapAlignment.center,
+          spacing: 4,
+          runSpacing: 4,
+          children: [
+            _TempoChip(
+              label: '−100ms',
+              onPressed: enabled ? () => onNudge(-0.1) : null,
+            ),
+            _TempoChip(
+              label: '−50ms',
+              onPressed: enabled ? () => onNudge(-0.05) : null,
+            ),
+            _TempoChip(
+              label: 'Reset',
+              onPressed: enabled && isOverridden ? onReset : null,
+            ),
+            _TempoChip(
+              label: '+50ms',
+              onPressed: enabled ? () => onNudge(0.05) : null,
+            ),
+            _TempoChip(
+              label: '+100ms',
+              onPressed: enabled ? () => onNudge(0.1) : null,
             ),
           ],
         ),

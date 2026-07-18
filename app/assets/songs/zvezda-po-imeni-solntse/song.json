@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "id": "zvezda-po-imeni-solntse",
+  "title": "Звезда по имени Солнце",
+  "artist": "Кино",
+  "key": "Am",
+  "capo": 0,
+  "tempoBpm": 80,
+  "timeSignature": [4, 4],
+  "tags": ["beginner", "russian", "practice"],
+  "audio": {
+    "file": "audio/solnce.mp3",
+    "offsetSec": 0.57,
+    "durationSec": 226.56
+  },
+  "strum": {
+    "name": "Восьмёрка",
+    "unitBeats": 0.5,
+    "steps": ["D", "U", "X", "U", "D", "U", "X", "."]
+  },
+  "sections": [
+    {
+      "id": "intro",
+      "name": "Intro",
+      "events": [
+        { "beat": 0, "durationBeats": 4, "chord": "Am", "lyrics": "" },
+        { "beat": 4, "durationBeats": 4, "chord": "C", "lyrics": "" },
+        { "beat": 8, "durationBeats": 4, "chord": "Dm", "lyrics": "" },
+        { "beat": 12, "durationBeats": 4, "chord": "G", "lyrics": "" }
+      ]
+    },
+    {
+      "id": "verse1",
+      "name": "Verse 1",
+      "events": [
+        { "beat": 16, "durationBeats": 4, "chord": "Am", "lyrics": "Белый снег, серый лёд," },
+        { "beat": 20, "durationBeats": 4, "chord": "C", "lyrics": "На растрескавшейся земле." },
+        { "beat": 24, "durationBeats": 4, "chord": "Dm", "lyrics": "Одеялом лоскутным на ней —" },
+        { "beat": 28, "durationBeats": 4, "chord": "G", "lyrics": "Город в дорожной петле." },
+        { "beat": 32, "durationBeats": 4, "chord": "Am", "lyrics": "А над городом плывут облака," },
+        { "beat": 36, "durationBeats": 4, "chord": "C", "lyrics": "Закрывая небесный свет." },
+        { "beat": 40, "durationBeats": 4, "chord": "Dm", "lyrics": "А над городом жёлтый дым —" },
+        { "beat": 44, "durationBeats": 4, "chord": "G", "lyrics": "Городу две тысячи лет." },
+        { "beat": 48, "durationBeats": 4, "chord": "Dm", "lyrics": "Прожитых под светом звезды" },
+        { "beat": 52, "durationBeats": 4, "chord": "G", "lyrics": "По имени Солнце…" }
+      ]
+    },
+    {
+      "id": "verse2",
+      "name": "Verse 2",
+      "events": [
+        { "beat": 56, "durationBeats": 4, "chord": "Am", "lyrics": "И две тысячи лет — война," },
+        { "beat": 60, "durationBeats": 4, "chord": "C", "lyrics": "Война без особых причин." },
+        { "beat": 64, "durationBeats": 4, "chord": "Dm", "lyrics": "Война — дело молодых," },
+        { "beat": 68, "durationBeats": 4, "chord": "G", "lyrics": "Лекарство против морщин." },
+        { "beat": 72, "durationBeats": 4, "chord": "Am", "lyrics": "Красная, красная кровь —" },
+        { "beat": 76, "durationBeats": 4, "chord": "C", "lyrics": "Через час уже просто земля," },
+        { "beat": 80, "durationBeats": 4, "chord": "Dm", "lyrics": "Через два на ней цветы и трава," },
+        { "beat": 84, "durationBeats": 4, "chord": "G", "lyrics": "Через три она снова жива." },
+        { "beat": 88, "durationBeats": 4, "chord": "Dm", "lyrics": "И согрета лучами звезды" },
+        { "beat": 92, "durationBeats": 4, "chord": "G", "lyrics": "По имени Солнце…" }
+      ]
+    },
+    {
+      "id": "verse3",
+      "name": "Verse 3",
+      "events": [
+        { "beat": 96, "durationBeats": 4, "chord": "Am", "lyrics": "И мы знаем, что так было всегда," },
+        { "beat": 100, "durationBeats": 4, "chord": "C", "lyrics": "Что судьбою больше любим," },
+        { "beat": 104, "durationBeats": 4, "chord": "Dm", "lyrics": "Кто живёт по законам другим" },
+        { "beat": 108, "durationBeats": 4, "chord": "G", "lyrics": "И кому умирать молодым." },
+        { "beat": 112, "durationBeats": 4, "chord": "Am", "lyrics": "Он не помнит слово «да» и слово «нет»," },
+        { "beat": 116, "durationBeats": 4, "chord": "C", "lyrics": "Он не помнит ни чинов, ни имён" },
+        { "beat": 120, "durationBeats": 4, "chord": "Dm", "lyrics": "И способен дотянуться до звёзд," },
+        { "beat": 124, "durationBeats": 4, "chord": "G", "lyrics": "Не считая, что это сон,—" },
+        { "beat": 128, "durationBeats": 4, "chord": "Dm", "lyrics": "И упасть, опалённым звездой" },
+        { "beat": 132, "durationBeats": 4, "chord": "G", "lyrics": "По имени Солнце…" }
+      ]
+    },
+    {
+      "id": "outro",
+      "name": "Outro",
+      "events": [
+        { "beat": 136, "durationBeats": 4, "chord": "Am", "lyrics": "" },
+        { "beat": 140, "durationBeats": 4, "chord": "C", "lyrics": "" },
+        { "beat": 144, "durationBeats": 4, "chord": "Dm", "lyrics": "" },
+        { "beat": 148, "durationBeats": 4, "chord": "G", "lyrics": "" },
+        { "beat": 152, "durationBeats": 4, "chord": "Am", "lyrics": "" }
+      ]
+    }
+  ],
+  "accompaniment": {
+    "style": "metronome_and_pad",
+    "volume": 0.7
+  }
+}

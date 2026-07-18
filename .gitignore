@@ -15,3 +15,9 @@ app/macos/Flutter/ephemeral/
 .vscode/
 .DS_Store
 *.swp
+
+# Local commercial / copyrighted song backing tracks (do not push)
+app/assets/songs/**/audio/*.mp3
+app/assets/songs/**/audio/*.ogg
+app/assets/songs/**/audio/*.wav
+app/assets/songs/**/audio/*.m4a

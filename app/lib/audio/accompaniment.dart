@@ -30,20 +30,37 @@ class Accompaniment {
 
   BackingAudioPlayer get backing => _backing;
 
+  /// Prepare players for [song].
+  ///
+  /// When [preferBackingAudio] is true and the song declares audio, tries to
+  /// load the track as master clock. Soft-fails to metronome + guide if the
+  /// asset is missing. When false, always uses the synthetic path even if a
+  /// track is available.
   Future<void> prepare(
     Song song, {
     double? metronomeVolume,
     double? guideVolume,
+    double? backingVolume,
+    bool preferBackingAudio = true,
+    double? mapTempoBpm,
+    double? audioOffsetSec,
   }) async {
-    _useAudio = song.hasAudio;
     _musicPlaying = false;
 
-    // Metronome for count-in (and full session when no audio).
+    // Metronome for count-in (and full session when no / unused audio).
     await _metronome.prepare(song, volume: metronomeVolume);
     await _guide.prepare(song, volume: guideVolume);
 
-    if (_useAudio) {
-      await _backing.prepare(song);
+    if (song.hasAudio && preferBackingAudio) {
+      final ok = await _backing.prepare(
+        song,
+        volume: backingVolume ?? song.accompaniment.volume,
+        mapTempoBpm: mapTempoBpm ?? song.tempoBpm,
+        offsetSec: audioOffsetSec ?? song.audio?.offsetSec,
+      );
+      _useAudio = ok;
+    } else {
+      _useAudio = false;
     }
   }
 
@@ -53,10 +70,18 @@ class Accompaniment {
 
   double get metronomeVolume => _metronome.volume;
 
-  /// Live guitar guide gain 0–1 (0 = fully off).
+  /// Live guitar guide gain 0–1 (0 = fully off). Synth path only.
   Future<void> setGuideVolume(double volume) => _guide.setVolume(volume);
 
   double get guideVolume => _guide.volume;
+
+  /// Live backing-track gain 0–1 (Recording path).
+  Future<void> setBackingVolume(double volume) => _backing.setVolume(volume);
+
+  /// Update chart ↔ media mapping for seeks (map BPM / offset).
+  void setMapTiming({double? mapTempoBpm, double? offsetSec}) {
+    _backing.setMapTiming(mapTempoBpm: mapTempoBpm, offsetSec: offsetSec);
+  }
 
   /// Called every clock tick with the current song beat (may be negative).
   Future<void> onBeat(double beat) async {
@@ -114,7 +139,7 @@ class Accompaniment {
     }
   }
 
-  /// Rate for backing audio (1.0 = song tempo). No-op without audio master.
+  /// Rate for backing audio (1.0 = normal). Chart map BPM does not use this.
   Future<void> setPlaybackRate(double rate) async {
     if (!_useAudio) return;
     await _backing.setPlaybackRate(rate);

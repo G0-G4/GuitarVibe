@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../domain/accompaniment_mode.dart';
 import '../../domain/calibration.dart';
 import '../../domain/chord_tones.dart';
 import '../../domain/chord_vocabulary.dart';
@@ -17,12 +18,17 @@ const _thresholdPrefsKey = 'thresholdPrefs.v1';
 const _chordVocabularyKey = 'chordVocabulary.v1';
 const _metronomeVolumeKey = 'metronomeVolume';
 const _guideVolumeKey = 'guideVolume';
+const _backingVolumeKey = 'backingVolume';
+const _accompanimentModeKey = 'accompanimentMode';
 
 /// Default metronome gain (matches song accompaniment default).
 const double defaultMetronomeVolume = 0.7;
 
 /// Default guitar guide (pad + strum) gain.
 const double defaultGuideVolume = 0.55;
+
+/// Default backing-track gain (Recording mode).
+const double defaultBackingVolume = 0.7;
 
 /// Metronome click volume 0–1 (persisted). 0 = fully off.
 class MetronomeVolumeNotifier extends Notifier<double> {
@@ -111,6 +117,81 @@ class GuideVolumeNotifier extends Notifier<double> {
 
 final guideVolumeProvider = NotifierProvider<GuideVolumeNotifier, double>(
   GuideVolumeNotifier.new,
+);
+
+/// Backing-track volume 0–1 when playing with a recording (persisted).
+class BackingVolumeNotifier extends Notifier<double> {
+  double _lastAudible = defaultBackingVolume;
+
+  @override
+  double build() {
+    Future.microtask(_load);
+    return defaultBackingVolume;
+  }
+
+  Future<void> _load() async {
+    final prefs = await SharedPreferences.getInstance();
+    final v = prefs.getDouble(_backingVolumeKey);
+    if (v == null) {
+      state = defaultBackingVolume;
+      return;
+    }
+    state = v.clamp(0.0, 1.0);
+    if (state > 0) _lastAudible = state;
+  }
+
+  Future<void> setVolume(double value) async {
+    final v = value.clamp(0.0, 1.0);
+    state = v;
+    if (v > 0) _lastAudible = v;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble(_backingVolumeKey, v);
+  }
+
+  Future<void> toggleMute() async {
+    if (state > 0) {
+      _lastAudible = state;
+      await setVolume(0);
+    } else {
+      await setVolume(
+        _lastAudible > 0 ? _lastAudible : defaultBackingVolume,
+      );
+    }
+  }
+}
+
+final backingVolumeProvider = NotifierProvider<BackingVolumeNotifier, double>(
+  BackingVolumeNotifier.new,
+);
+
+/// Preferred accompaniment when a song has a backing track (persisted).
+///
+/// Songs without audio always use [AccompanimentMode.generated].
+/// Default: [AccompanimentMode.audio] (prefer the recording when available).
+class AccompanimentModeNotifier extends Notifier<AccompanimentMode> {
+  @override
+  AccompanimentMode build() {
+    Future.microtask(_load);
+    return AccompanimentMode.audio;
+  }
+
+  Future<void> _load() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_accompanimentModeKey);
+    final parsed = AccompanimentModeX.tryParse(raw);
+    if (parsed != null) state = parsed;
+  }
+
+  Future<void> setMode(AccompanimentMode mode) async {
+    state = mode;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_accompanimentModeKey, mode.name);
+  }
+}
+
+final accompanimentModeProvider =
+    NotifierProvider<AccompanimentModeNotifier, AccompanimentMode>(
+  AccompanimentModeNotifier.new,
 );
 
 /// Whether mic scoring is enabled (persisted). Default: true.

@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../domain/accompaniment_mode.dart';
 import '../../domain/song.dart';
+import '../player/widgets/accompaniment_mode_picker.dart';
 import '../player/widgets/strum_pattern_bar.dart';
+import '../settings/settings_providers.dart';
 import 'library_providers.dart';
 
 class SongDetailScreen extends ConsumerWidget {
@@ -37,15 +40,18 @@ class SongDetailScreen extends ConsumerWidget {
   }
 }
 
-class _SongDetailBody extends StatelessWidget {
+class _SongDetailBody extends ConsumerWidget {
   const _SongDetailBody({required this.song});
 
   final Song song;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final timeSig = '${song.timeSignature[0]}/${song.timeSignature[1]}';
+    final mode = ref.watch(accompanimentModeProvider);
+    final effectiveMode =
+        song.hasAudio ? mode : AccompanimentMode.generated;
 
     return Scaffold(
       appBar: AppBar(
@@ -64,11 +70,7 @@ class _SongDetailBody extends StatelessWidget {
               _MetaChip(label: timeSig),
               if (song.key != null) _MetaChip(label: 'Key ${song.key}'),
               if (song.capo > 0) _MetaChip(label: 'Capo ${song.capo}'),
-              _MetaChip(
-                label: song.hasAudio
-                    ? 'Backing audio'
-                    : 'Metronome + guitar guide',
-              ),
+              _MetaChip(label: effectiveMode.description),
               if (song.hasStrum)
                 _MetaChip(
                   label: song.strum!.name != null &&
@@ -83,11 +85,23 @@ class _SongDetailBody extends StatelessWidget {
             const SizedBox(height: 16),
             StrumPatternPreview(pattern: song.strum!),
           ],
+          if (song.hasAudio) ...[
+            const SizedBox(height: 20),
+            AccompanimentModePicker(
+              mode: mode,
+              onChanged: (m) =>
+                  ref.read(accompanimentModeProvider.notifier).setMode(m),
+            ),
+          ],
           const SizedBox(height: 24),
           FilledButton.icon(
             onPressed: () => context.push('/song/${song.id}/play'),
             icon: const Icon(Icons.play_arrow),
-            label: const Text('Play'),
+            label: Text(
+              song.hasAudio && mode == AccompanimentMode.audio
+                  ? 'Play with recording'
+                  : 'Play with guide',
+            ),
           ),
           const SizedBox(height: 32),
           Text('Chords & lyrics', style: theme.textTheme.titleLarge),

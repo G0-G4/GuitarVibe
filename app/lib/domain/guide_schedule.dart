@@ -10,8 +10,10 @@ class GuideActions {
   const GuideActions({
     this.padNotes = const [],
     this.strumNotes = const [],
+    this.voicingNotes = const [],
     this.strumToken,
     this.mute = false,
+    this.muteUp = false,
   });
 
   /// Soft pad / chord-change notes (empty = no pad event this tick).
@@ -20,11 +22,17 @@ class GuideActions {
   /// Strum stroke notes (empty unless a new stroke step started).
   final List<int> strumNotes;
 
+  /// Current chord voicing (for mute ghosts even mid-hold).
+  final List<int> voicingNotes;
+
   /// Raw step token when a new step started (`D`/`U`/`X`/`.`), else null.
   final String? strumToken;
 
   /// True when this step is a mute/chuck (`X`).
   final bool mute;
+
+  /// Prefer thinner upstroke chuck sample (after an up pick).
+  final bool muteUp;
 
   bool get hasPad => padNotes.isNotEmpty;
   bool get hasStrum => strumNotes.isNotEmpty || mute;
@@ -78,6 +86,7 @@ class GuideScheduler {
     List<int> strumNotes = const [];
     String? token;
     var mute = false;
+    var muteUp = false;
 
     final strum = song.strum;
     if (strum != null && !strum.isEmpty) {
@@ -88,9 +97,14 @@ class GuideScheduler {
         final t = token.toUpperCase();
         if (t == 'X') {
           mute = true;
+          // Chuck after upstroke tends to be thinner / higher strings.
+          final prevIdx = (stepIdx - 1) % strum.steps.length;
+          final prev = strum.steps[prevIdx].toUpperCase();
+          muteUp = prev == 'U';
         } else if (StrumPattern.isStroke(token) && !isNc) {
           // D = low→high order (already sorted); U = reverse.
-          strumNotes = t == 'U' ? notes.reversed.toList() : List<int>.from(notes);
+          strumNotes =
+              t == 'U' ? notes.reversed.toList() : List<int>.from(notes);
         }
       }
     } else {
@@ -101,8 +115,10 @@ class GuideScheduler {
     return GuideActions(
       padNotes: padNotes,
       strumNotes: strumNotes,
+      voicingNotes: isNc ? const [] : notes,
       strumToken: token,
       mute: mute,
+      muteUp: muteUp,
     );
   }
 }

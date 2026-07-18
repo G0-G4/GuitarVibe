@@ -75,6 +75,9 @@ No in-app editor — edit files in any text editor.
 - Relative to song pack directory or app documents.
 - When present, playback position is the master clock.
 - `offsetSec`: song beat 0 maps to this time in the file.
+- Large / commercial recordings should stay **local** (gitignored under
+  `assets/songs/**/audio/*.{mp3,ogg,wav,m4a}`). If the file is missing at
+  runtime, the app falls back to metronome + guitar guide.
 
 ### `strum` (optional) — right-hand pattern / «бой»
 

@@ -287,7 +287,9 @@ guitar/
 
 Notes: metronome clicks via `just_audio` + bundled WAV assets. Guitar guide
 (pad + strum samples, Karplus–Strong bank) implemented — see Phase 4 note.
-Backing-audio path implemented (no bundled track yet — all demos use metronome/guide).
+Backing-audio path implemented. First real track: «Звезда по имени Солнце»
+(`assets/songs/zvezda-po-imeni-solntse/audio/solnce.mp3`, local/gitignored;
+missing file → metronome + guide fallback).
 
 ### Phase 2 — Import files (no editor) — **deferred**
 
@@ -325,15 +327,23 @@ Notes: `record` PCM16 stream + `pitch_detector_dart` (YIN); match = pitch class 
 
 - [x] Practice tempo override (±5 / ±10 BPM, clamp 40–240, reset to song)
 - [x] Scrub seek on progress slider (reopen score windows for retry/skip)
-- [x] BeatClock.setTempoBpm re-anchors without jump; audio path uses setSpeed
+- [x] BeatClock.setTempoBpm re-anchors without jump
 - [x] Metronome volume 0–100% (persisted; 0 = fully off; player + settings)
+- [x] Recording mode: Track volume (separate from Guide); ±BPM = **chart map**
+  (sync chords to track, mp3 rate stays 1.0); session offset nudge (±50/100 ms)
+- [x] Accompaniment picker: Recording vs Guide (when song has audio)
+
+Notes: Practice slow-down of the recording (setSpeed) is intentionally **not**
+tied to ±BPM in Recording mode — that control calibrates the chart. Separate
+practice-rate control can return later. Auto BPM estimate remains Phase 4.
 
 ### Phase 4 — Polish + more platforms + audio helpers
 
 - [ ] Enable android/ios/windows targets
 - [ ] Chord diagrams, transpose/capo
 - [x] Better synth fallback — guitar guide: pad on chord change + strum pattern samples (`assets/audio/guitar/`, Settings volume)
-- [ ] Optional: BPM estimate from audio (spike → feature)
+- [ ] Optional: BPM estimate from audio (spike → feature) — offline one-shot
+  on the file (onset + autocorrelation); half/double-time UI; not live tracking
 - [ ] Tests, packaging
 
 ### Phase 5 — Online catalog

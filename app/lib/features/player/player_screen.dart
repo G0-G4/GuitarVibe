@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../domain/accompaniment_mode.dart';
 import '../../domain/play_session.dart';
 import '../library/library_providers.dart';
 import '../scoring/widgets/live_feedback_badge.dart';
@@ -9,6 +10,7 @@ import '../settings/settings_providers.dart';
 import 'play_session_controller.dart';
 import 'widgets/chord_scroller.dart';
 import 'widgets/countdown_overlay.dart';
+import 'widgets/lyrics_scroller.dart';
 import 'widgets/play_transport.dart';
 import 'widgets/strum_pattern_bar.dart';
 
@@ -30,6 +32,8 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
     final songAsync = ref.watch(songByIdProvider(widget.songId));
     final metronomeVolume = ref.watch(metronomeVolumeProvider);
     final guideVolume = ref.watch(guideVolumeProvider);
+    final backingVolume = ref.watch(backingVolumeProvider);
+    final accompanimentMode = ref.watch(accompanimentModeProvider);
 
     // Navigate when finished.
     ref.listen(playSessionProvider(widget.songId), (prev, next) {
@@ -66,8 +70,6 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
               countInBeats: countInBeatsFor(song),
             );
 
-        final event = snapshot.currentEvent(song);
-        final lyrics = event?.lyrics ?? '';
         final theme = Theme.of(context);
         final error = session?.error;
         final scoringError = session?.scoringError;
@@ -76,6 +78,9 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
             session?.effectiveTempoBpm ?? song.tempoBpm;
         final controller =
             ref.read(playSessionProvider(widget.songId).notifier);
+        // Shared geometry so lyric phrases align in time with chord cards.
+        const scrollerPxPerBeat = 100.0;
+        const scrollerPlayheadFraction = 0.28;
 
         return Scaffold(
           appBar: AppBar(
@@ -124,58 +129,64 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                           ),
                         ),
                       ],
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 12),
                       Expanded(
                         flex: 3,
                         child: ChordScroller(
                           events: song.allEvents,
                           currentBeat: snapshot.currentBeat,
                           totalBeats: song.totalBeats,
+                          pxPerBeat: scrollerPxPerBeat,
+                          playheadFraction: scrollerPlayheadFraction,
                           onSeek: snapshot.status == PlayStatus.finished ||
                                   snapshot.status == PlayStatus.idle
                               ? null
                               : controller.seekToBeat,
                         ),
                       ),
+                      const SizedBox(height: 10),
+                      Expanded(
+                        flex: 2,
+                        child: LyricsScroller(
+                          events: song.allEvents,
+                          currentBeat: snapshot.currentBeat,
+                          pxPerBeat: scrollerPxPerBeat,
+                          playheadFraction: scrollerPlayheadFraction,
+                        ),
+                      ),
                       if (song.hasStrum) ...[
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 10),
                         StrumPatternBar(
                           pattern: song.strum!,
                           currentBeat: snapshot.currentBeat,
                         ),
                       ],
                       if (scoringActive) ...[
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 10),
                         LiveFeedbackBadge(
                           grade: session?.lastHit,
                           streak: session?.liveScore?.currentStreak ?? 0,
                           epoch: session?.lastHitEpoch ?? 0,
                         ),
                       ],
-                      const SizedBox(height: 12),
-                      SizedBox(
-                        height: 72,
-                        child: Center(
-                          child: AnimatedSwitcher(
-                            duration: const Duration(milliseconds: 150),
-                            child: Text(
-                              lyrics.isEmpty ? '—' : lyrics,
-                              key: ValueKey(lyrics),
-                              textAlign: TextAlign.center,
-                              style: theme.textTheme.headlineSmall?.copyWith(
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const Spacer(),
+                      const SizedBox(height: 8),
                       PlayTransport(
                         song: song,
                         snapshot: snapshot,
                         effectiveTempoBpm: effectiveTempo,
                         metronomeVolume: metronomeVolume,
-                        guideVolume: guideVolume,
+                        secondaryVolume: (session?.usesAudioMaster ?? false)
+                            ? backingVolume
+                            : guideVolume,
+                        usesAudioMaster: session?.usesAudioMaster ?? false,
+                        // User preference (session may soft-fail to guide).
+                        accompanimentMode: song.hasAudio
+                            ? accompanimentMode
+                            : AccompanimentMode.generated,
+                        audioOffsetSec: session?.audioOffsetSec ??
+                            (song.audio?.offsetSec ?? 0),
+                        isOffsetOverridden:
+                            session?.isOffsetOverridden ?? false,
                         onPause: controller.pause,
                         onResume: controller.resume,
                         onRestart: () {
@@ -191,10 +202,38 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
                         onToggleMetronomeMute: () => ref
                             .read(metronomeVolumeProvider.notifier)
                             .toggleMute(),
-                        onGuideVolume: (v) =>
-                            ref.read(guideVolumeProvider.notifier).setVolume(v),
-                        onToggleGuideMute: () =>
-                            ref.read(guideVolumeProvider.notifier).toggleMute(),
+                        onSecondaryVolume: (v) {
+                          if (session?.usesAudioMaster ?? false) {
+                            ref
+                                .read(backingVolumeProvider.notifier)
+                                .setVolume(v);
+                          } else {
+                            ref
+                                .read(guideVolumeProvider.notifier)
+                                .setVolume(v);
+                          }
+                        },
+                        onToggleSecondaryMute: () {
+                          if (session?.usesAudioMaster ?? false) {
+                            ref
+                                .read(backingVolumeProvider.notifier)
+                                .toggleMute();
+                          } else {
+                            ref
+                                .read(guideVolumeProvider.notifier)
+                                .toggleMute();
+                          }
+                        },
+                        onAccompanimentMode: (mode) async {
+                          await ref
+                              .read(accompanimentModeProvider.notifier)
+                              .setMode(mode);
+                          if (!mounted) return;
+                          _navigatedToComplete = false;
+                          await controller.restart();
+                        },
+                        onNudgeOffset: controller.nudgeAudioOffset,
+                        onResetOffset: controller.resetAudioOffset,
                       ),
                     ],
                   ),

@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../audio/accompaniment.dart';
 import '../../audio/beat_clock.dart';
 import '../../audio/mic_pitch_source.dart';
+import '../../domain/accompaniment_mode.dart';
 import '../../domain/chord_guess.dart';
 import '../../domain/play_session.dart';
 import '../../domain/score.dart';
@@ -18,6 +19,8 @@ class PlaySessionState {
     required this.song,
     required this.snapshot,
     required this.effectiveTempoBpm,
+    this.audioOffsetSec = 0,
+    this.usesAudioMaster = false,
     this.error,
     this.lastHit,
     this.lastHitEpoch = 0,
@@ -29,8 +32,18 @@ class PlaySessionState {
   final Song song;
   final PlaySessionSnapshot snapshot;
 
-  /// Practice tempo (BPM). Defaults to [Song.tempoBpm]; user can override.
+  /// Chart tempo (BPM).
+  ///
+  /// Guide mode: drives the synth clock (practice speed).
+  /// Recording mode: **map BPM** — how audio time maps to chart beats.
+  /// Does **not** change mp3 playback rate.
   final double effectiveTempoBpm;
+
+  /// Media time (sec) mapped to song beat 0 (Recording). Session-local nudge.
+  final double audioOffsetSec;
+
+  /// True when this session actually uses the backing track as clock master.
+  final bool usesAudioMaster;
 
   final String? error;
 
@@ -52,10 +65,21 @@ class PlaySessionState {
   bool get isTempoOverridden =>
       (effectiveTempoBpm - song.tempoBpm).abs() > 0.01;
 
+  bool get isOffsetOverridden {
+    final authored = song.audio?.offsetSec ?? 0;
+    return (audioOffsetSec - authored).abs() > 0.001;
+  }
+
+  /// Active accompaniment mode for UI (after soft-fail of missing audio).
+  AccompanimentMode get activeAccompanimentMode =>
+      usesAudioMaster ? AccompanimentMode.audio : AccompanimentMode.generated;
+
   PlaySessionState copyWith({
     Song? song,
     PlaySessionSnapshot? snapshot,
     double? effectiveTempoBpm,
+    double? audioOffsetSec,
+    bool? usesAudioMaster,
     String? error,
     bool clearError = false,
     HitGrade? lastHit,
@@ -70,6 +94,8 @@ class PlaySessionState {
       song: song ?? this.song,
       snapshot: snapshot ?? this.snapshot,
       effectiveTempoBpm: effectiveTempoBpm ?? this.effectiveTempoBpm,
+      audioOffsetSec: audioOffsetSec ?? this.audioOffsetSec,
+      usesAudioMaster: usesAudioMaster ?? this.usesAudioMaster,
       error: clearError ? null : (error ?? this.error),
       lastHit: clearLastHit ? null : (lastHit ?? this.lastHit),
       lastHitEpoch: lastHitEpoch ?? this.lastHitEpoch,
@@ -103,14 +129,23 @@ class PlaySessionController extends Notifier<PlaySessionState?> {
       _disposeResources();
     });
 
-    // Live metronome / guide volume from settings (also mid-session).
+    // Live volumes from settings (also mid-session).
     ref.listen<double>(metronomeVolumeProvider, (prev, next) {
       final acc = _accompaniment;
       if (acc != null) unawaited(acc.setMetronomeVolume(next));
     });
     ref.listen<double>(guideVolumeProvider, (prev, next) {
       final acc = _accompaniment;
-      if (acc != null) unawaited(acc.setGuideVolume(next));
+      // Synth guide only; Recording uses backing volume.
+      if (acc != null && !acc.usesAudioMaster) {
+        unawaited(acc.setGuideVolume(next));
+      }
+    });
+    ref.listen<double>(backingVolumeProvider, (prev, next) {
+      final acc = _accompaniment;
+      if (acc != null && acc.usesAudioMaster) {
+        unawaited(acc.setBackingVolume(next));
+      }
     });
 
     // Load song asynchronously; auto-start count-in when ready.
@@ -126,6 +161,7 @@ class PlaySessionController extends Notifier<PlaySessionState?> {
       state = PlaySessionState(
         song: song,
         effectiveTempoBpm: song.tempoBpm,
+        audioOffsetSec: song.audio?.offsetSec ?? 0,
         snapshot: PlaySessionSnapshot(
           status: PlayStatus.idle,
           currentBeat: -countIn.toDouble(),
@@ -150,6 +186,7 @@ class PlaySessionController extends Notifier<PlaySessionState?> {
 
     final song = current.song;
     final effectiveTempo = clampTempoBpm(current.effectiveTempoBpm);
+    final audioOffset = current.audioOffsetSec;
     final countIn = countInBeatsFor(song);
     final scoringWanted = ref.read(scoringEnabledProvider);
     final mode = ref.read(recognitionModeProvider);
@@ -159,33 +196,32 @@ class PlaySessionController extends Notifier<PlaySessionState?> {
     try {
       final metronomeVolume = ref.read(metronomeVolumeProvider);
       final guideVolume = ref.read(guideVolumeProvider);
+      final backingVolume = ref.read(backingVolumeProvider);
+      final preferAudio =
+          ref.read(accompanimentModeProvider) == AccompanimentMode.audio;
       final accompaniment = Accompaniment();
       await accompaniment.prepare(
         song,
         metronomeVolume: metronomeVolume,
         guideVolume: guideVolume,
+        backingVolume: backingVolume,
+        preferBackingAudio: preferAudio,
+        mapTempoBpm: effectiveTempo,
+        audioOffsetSec: audioOffset,
       );
       if (_disposed) {
         await accompaniment.dispose();
         return;
       }
 
-      // Metronome path: clock runs at effective tempo.
-      // Audio master: clock.tempoBpm stays song tempo (position→beat);
-      // practice speed is applied via setPlaybackRate.
-      final clockTempo = song.hasAudio ? song.tempoBpm : effectiveTempo;
-      final clock = BeatClock(tempoBpm: clockTempo);
+      // Guide path: clock runs at effective (practice) tempo.
+      // Recording path: clock map BPM = effectiveTempo; mp3 rate stays 1.0.
+      // usesAudioMaster is false when user chose Guide, or asset failed to load.
+      final audioMaster = accompaniment.usesAudioMaster;
+      final clock = BeatClock(tempoBpm: effectiveTempo);
       clock.onTick = _onTick;
       _clock = clock;
       _accompaniment = accompaniment;
-
-      if (song.hasAudio) {
-        final rate = playbackRateFor(
-          effectiveTempoBpm: effectiveTempo,
-          songTempoBpm: song.tempoBpm,
-        );
-        await accompaniment.setPlaybackRate(rate);
-      }
 
       ScoreEngine? engine;
       String? scoringError;
@@ -216,14 +252,23 @@ class PlaySessionController extends Notifier<PlaySessionState?> {
       // Clear previous complete-screen score when restarting.
       ref.read(lastSessionScoreProvider.notifier).clear();
 
+      String? playError;
+      if (preferAudio && song.hasAudio && !audioMaster) {
+        playError = accompaniment.backing.lastError ??
+            'Backing audio unavailable — using guide.';
+      }
+
       state = current.copyWith(
         effectiveTempoBpm: effectiveTempo,
+        audioOffsetSec: audioOffset,
+        usesAudioMaster: audioMaster,
         snapshot: PlaySessionSnapshot(
           status: PlayStatus.countdown,
           currentBeat: -countIn.toDouble(),
           countInBeats: countIn,
         ),
-        clearError: true,
+        error: playError,
+        clearError: playError == null,
         clearLastHit: true,
         liveScore: scoringActive ? engine?.summary : null,
         scoringActive: scoringActive,
@@ -378,7 +423,10 @@ class PlaySessionController extends Notifier<PlaySessionState?> {
     await start();
   }
 
-  /// Set practice tempo (BPM). Keeps current beat; re-anchors the clock.
+  /// Set chart / practice tempo (BPM). Keeps current beat; re-anchors the clock.
+  ///
+  /// Recording mode: updates **map BPM** only (chart vs track). mp3 rate stays 1.0.
+  /// Guide mode: changes synth clock speed (practice tempo).
   Future<void> setTempoBpm(double bpm) async {
     final current = state;
     if (current == null || _disposed) return;
@@ -388,19 +436,14 @@ class PlaySessionController extends Notifier<PlaySessionState?> {
     }
 
     final effective = clampTempoBpm(bpm);
-    final song = current.song;
     final clock = _clock;
     final acc = _accompaniment;
 
-    if (song.hasAudio && acc != null) {
-      final rate = playbackRateFor(
-        effectiveTempoBpm: effective,
-        songTempoBpm: song.tempoBpm,
-      );
-      await acc.setPlaybackRate(rate);
-      // Audio master: do not change clock.tempoBpm (position→beat uses song BPM).
-    } else {
-      clock?.setTempoBpm(effective);
+    // Both paths re-anchor the clock at the current beat.
+    clock?.setTempoBpm(effective);
+    if (acc != null && acc.usesAudioMaster) {
+      // Keep seek mapping in sync for future scrub / restart from beat.
+      acc.setMapTiming(mapTempoBpm: effective);
     }
 
     if (_disposed) return;
@@ -417,6 +460,55 @@ class PlaySessionController extends Notifier<PlaySessionState?> {
     final current = state;
     if (current == null) return;
     await setTempoBpm(current.song.tempoBpm);
+  }
+
+  /// Nudge media offset (sec) so beat 0 locks to the recording. Recording only.
+  Future<void> nudgeAudioOffset(double deltaSec) async {
+    final current = state;
+    if (current == null || _disposed) return;
+    if (!current.usesAudioMaster) return;
+    if (current.snapshot.status == PlayStatus.finished ||
+        current.snapshot.status == PlayStatus.idle) {
+      return;
+    }
+
+    final next = current.audioOffsetSec + deltaSec;
+    await setAudioOffsetSec(next);
+  }
+
+  Future<void> resetAudioOffset() async {
+    final current = state;
+    if (current == null) return;
+    await setAudioOffsetSec(current.song.audio?.offsetSec ?? 0);
+  }
+
+  Future<void> setAudioOffsetSec(double offsetSec) async {
+    final current = state;
+    if (current == null || _disposed) return;
+    if (!current.usesAudioMaster) return;
+    if (current.snapshot.status == PlayStatus.finished ||
+        current.snapshot.status == PlayStatus.idle) {
+      return;
+    }
+
+    final acc = _accompaniment;
+    final clock = _clock;
+    if (acc == null || clock == null) return;
+
+    acc.setMapTiming(offsetSec: offsetSec);
+    final beat = current.snapshot.currentBeat;
+    final wasPaused = current.snapshot.status == PlayStatus.paused;
+    final playing = !wasPaused;
+
+    if (beat >= 0 && _musicStarted) {
+      await acc.seekToBeat(beat, playing: playing);
+      if (_disposed) return;
+      clock.masterPosition = () => acc.backing.position;
+      clock.seekBeat(beat);
+    }
+
+    if (_disposed) return;
+    state = current.copyWith(audioOffsetSec: offsetSec);
   }
 
   /// Scrub to a song body beat (clamped to `[0, totalBeats]`).

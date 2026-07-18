@@ -60,6 +60,24 @@ void main() {
     });
   });
 
+  group('audio map: media time ↔ beat', () {
+    test('higher map BPM packs more beats into the same media span', () {
+      // 2 seconds after offset at 60 BPM → 2 beats; at 120 BPM → 4 beats.
+      expect(secondsToBeats(2, 60), 2);
+      expect(secondsToBeats(2, 120), 4);
+      expect(beatsToSeconds(4, 120), 2);
+      expect(beatsToSeconds(4, 60), 4);
+    });
+
+    test('offset shifts media time for beat 0 without changing beat spacing', () {
+      const offset = 0.57;
+      // Media position for beat 0 is just the offset.
+      expect(offset + beatsToSeconds(0, 80), offset);
+      // Beat 4 at 80 BPM is 3s of chart after offset.
+      expect(offset + beatsToSeconds(4, 80), closeTo(offset + 3.0, 1e-9));
+    });
+  });
+
   group('eventIndexAt', () {
     final events = [
       const ChordEvent(beat: 0, durationBeats: 4, chord: 'C'),
