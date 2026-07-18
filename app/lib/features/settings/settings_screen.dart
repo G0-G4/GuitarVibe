@@ -8,6 +8,13 @@ import 'settings_providers.dart';
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
+  static String _labSubtitle(WidgetRef ref) {
+    final cal = ref.watch(calibrationProvider);
+    final room = cal.hasNoise ? 'room ok' : 'room not set';
+    final g = cal.hasGuitar ? 'guitar ok' : 'guitar not set';
+    return 'Test recognition & calibrate ($room · $g)';
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final scoringEnabled = ref.watch(scoringEnabledProvider);
@@ -79,7 +86,12 @@ class SettingsScreen extends ConsumerWidget {
           ListTile(
             leading: const Icon(Icons.graphic_eq),
             title: const Text('Mic Lab'),
-            subtitle: const Text('Test recognition — play a chord, see the guess'),
+            subtitle: Text(
+              _labSubtitle(ref),
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => context.push('/lab'),
           ),
@@ -96,7 +108,7 @@ class SettingsScreen extends ConsumerWidget {
             child: Text(
               'Play near the mic and keep speaker volume moderate so the '
               'metronome does not drown out your guitar. Use Mic Lab to '
-              'compare modes before a scored play-along.',
+              'calibrate room/guitar noise isolation and compare modes.',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),

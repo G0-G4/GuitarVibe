@@ -1,12 +1,12 @@
 /// Tunable thresholds for recognition (single place to tweak).
 class RecognitionConfig {
   const RecognitionConfig({
-    this.rmsSilence = 0.022,
-    this.chromaMinScore = 0.58,
-    this.chromaMatchThreshold = 0.55,
-    this.chromaMargin = 0.08,
-    this.chromaMinConcentration = 0.48,
-    this.chromaHoldMs = 140,
+    this.rmsSilence = 0.012,
+    this.chromaMinScore = 0.50,
+    this.chromaMatchThreshold = 0.48,
+    this.chromaMargin = 0.06,
+    this.chromaMinConcentration = 0.42,
+    this.chromaHoldMs = 100,
     this.holdMs = 100,
     this.yinMinConfidence = 0.80,
     this.medianWindow = 5,
@@ -39,5 +39,34 @@ class RecognitionConfig {
   /// Odd window for median pitch-class smooth.
   final int medianWindow;
 
-  static const standard = RecognitionConfig();
+  /// Balanced defaults for uncalibrated use (usable without being noisy).
+  static const balanced = RecognitionConfig();
+
+  /// Alias kept for older call sites.
+  static const standard = balanced;
+
+  RecognitionConfig copyWith({
+    double? rmsSilence,
+    double? chromaMinScore,
+    double? chromaMatchThreshold,
+    double? chromaMargin,
+    double? chromaMinConcentration,
+    int? chromaHoldMs,
+    int? holdMs,
+    double? yinMinConfidence,
+    int? medianWindow,
+  }) {
+    return RecognitionConfig(
+      rmsSilence: rmsSilence ?? this.rmsSilence,
+      chromaMinScore: chromaMinScore ?? this.chromaMinScore,
+      chromaMatchThreshold: chromaMatchThreshold ?? this.chromaMatchThreshold,
+      chromaMargin: chromaMargin ?? this.chromaMargin,
+      chromaMinConcentration:
+          chromaMinConcentration ?? this.chromaMinConcentration,
+      chromaHoldMs: chromaHoldMs ?? this.chromaHoldMs,
+      holdMs: holdMs ?? this.holdMs,
+      yinMinConfidence: yinMinConfidence ?? this.yinMinConfidence,
+      medianWindow: medianWindow ?? this.medianWindow,
+    );
+  }
 }

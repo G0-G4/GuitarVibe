@@ -14,7 +14,7 @@ class ChordRecognizer {
   });
 
   RecognitionMode mode;
-  final RecognitionConfig config;
+  RecognitionConfig config;
 
   // Hold filter state (pitchClassHeld).
   int? _holdPc;

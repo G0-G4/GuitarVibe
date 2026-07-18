@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../domain/chord_tones.dart';
 import '../../domain/recognition_mode.dart';
 import 'mic_lab_controller.dart';
+import 'widgets/calibration_card.dart';
 import 'widgets/chroma_bars.dart';
 import 'widgets/guess_display.dart';
 import 'widgets/level_meter.dart';
@@ -38,6 +39,21 @@ class MicLabScreen extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
           children: [
+            CalibrationCard(
+              calibration: lab.calibration,
+              phase: lab.calPhase,
+              progress: lab.calProgress,
+              message: lab.calMessage,
+              error: lab.calError,
+              rmsSilence: lab.config.rmsSilence,
+              onCalibrateRoom: () =>
+                  ref.read(micLabProvider.notifier).startRoomCalibration(),
+              onCalibrateGuitar: () =>
+                  ref.read(micLabProvider.notifier).startGuitarCalibration(),
+              onReset: () =>
+                  ref.read(micLabProvider.notifier).resetCalibration(),
+            ),
+            const SizedBox(height: 16),
             Text(
               'Recognition mode',
               style: theme.textTheme.labelLarge,
@@ -51,8 +67,10 @@ class MicLabScreen extends ConsumerWidget {
                   ChoiceChip(
                     label: Text(m.label),
                     selected: lab.mode == m,
-                    onSelected: (_) =>
-                        ref.read(micLabProvider.notifier).setMode(m),
+                    onSelected: lab.isCalibrating
+                        ? null
+                        : (_) =>
+                            ref.read(micLabProvider.notifier).setMode(m),
                   ),
               ],
             ),
@@ -77,7 +95,9 @@ class MicLabScreen extends ConsumerWidget {
                       Expanded(
                         child: Text(
                           lab.error!,
-                          style: TextStyle(color: theme.colorScheme.onErrorContainer),
+                          style: TextStyle(
+                            color: theme.colorScheme.onErrorContainer,
+                          ),
                         ),
                       ),
                       TextButton(
@@ -91,7 +111,10 @@ class MicLabScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 16),
             ],
-            LevelMeter(rms: lab.guess.rms),
+            LevelMeter(
+              rms: lab.guess.rms,
+              silenceThreshold: lab.config.rmsSilence,
+            ),
             const SizedBox(height: 28),
             GuessDisplay(guess: lab.guess),
             const SizedBox(height: 28),
@@ -111,7 +134,9 @@ class MicLabScreen extends ConsumerWidget {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  lab.listening ? 'Listening…' : 'Mic stopped',
+                  lab.isCalibrating
+                      ? 'Calibrating…'
+                      : (lab.listening ? 'Listening…' : 'Mic stopped'),
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -120,9 +145,8 @@ class MicLabScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              'Tip: play open chords (C, G, Am, F…) close to the mic. '
-              'Chroma ignores soft noise until the signal is tonal and stable; '
-              'Hybrid also needs a clear pitch. Single pitch is best for single notes.',
+              'Tip: first calibrate the room (silence), then optionally guitar level. '
+              'Chroma subtracts room profile; Hybrid also needs a clear pitch.',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.outline,
               ),

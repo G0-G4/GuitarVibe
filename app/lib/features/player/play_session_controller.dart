@@ -125,6 +125,8 @@ class PlaySessionController extends Notifier<PlaySessionState?> {
     final countIn = countInBeatsFor(song);
     final scoringWanted = ref.read(scoringEnabledProvider);
     final mode = ref.read(recognitionModeProvider);
+    final cal = ref.read(calibrationProvider);
+    final config = ref.read(effectiveRecognitionConfigProvider);
 
     try {
       final accompaniment = Accompaniment();
@@ -144,10 +146,12 @@ class PlaySessionController extends Notifier<PlaySessionState?> {
       var scoringActive = false;
 
       if (scoringWanted) {
-        engine = ScoreEngine(song.allEvents, mode: mode);
+        engine = ScoreEngine(song.allEvents, mode: mode, config: config);
         _scoreEngine = engine;
         try {
-          final mic = MicAnalysisSource();
+          final mic = MicAnalysisSource(
+            noiseChromaMean: cal.noise?.chromaMean,
+          );
           await mic.start();
           if (_disposed) {
             await mic.dispose();

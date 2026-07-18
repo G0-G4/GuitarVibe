@@ -80,10 +80,8 @@ List<double> pcm16ToFloat(Uint8List pcm16) {
   return out;
 }
 
-/// Build 12-bin chroma from time-domain float samples.
-///
-/// Uses a real radix-2 FFT (pads/truncates to power of two).
-List<double> chromaFromSamples(
+/// Raw (pre-normalize) 12-bin chroma energy from float samples.
+List<double> chromaRawFromSamples(
   List<double> samples, {
   required double sampleRate,
 }) {
@@ -126,7 +124,15 @@ List<double> chromaFromSamples(
     chroma[idx] += mag * weight;
   }
 
-  return l2Normalize(chroma);
+  return chroma;
+}
+
+/// Build L2-normalized 12-bin chroma from time-domain float samples.
+List<double> chromaFromSamples(
+  List<double> samples, {
+  required double sampleRate,
+}) {
+  return l2Normalize(chromaRawFromSamples(samples, sampleRate: sampleRate));
 }
 
 /// Qualities used for free recognition ranking (smaller set → fewer false hits).

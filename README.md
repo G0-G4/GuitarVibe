@@ -36,7 +36,7 @@ From a song detail screen tap **Play**:
 5. End screen with accuracy and hit breakdown
 
 Toggle scoring and **recognition mode** in **Settings** (library gear icon).  
-**Mic Lab** (waveform icon) lets you play any chord and see what the app hears.
+**Mic Lab** (waveform icon): play a chord, compare modes, and **calibrate room / guitar** so the app gates ambient noise and adapts thresholds.
 
 macOS will ask for microphone access.
 

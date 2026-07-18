@@ -315,6 +315,7 @@ Notes: `record` PCM16 stream + `pitch_detector_dart` (YIN); match = pitch class 
 - [x] Modes: Single pitch / Held pitch / Chroma / Hybrid
 - [x] Mic Lab screen (free recognition UI)
 - [x] Settings: mode picker + lab link; play-along uses selected mode
+- [x] Room + guitar calibration; chroma noise subtract + adaptive RMS gate
 
 **Exit:** open Mic Lab → play Am/C/G → correct guess most of the time; mode switch affects scoring.
 

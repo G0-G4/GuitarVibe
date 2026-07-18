@@ -43,14 +43,18 @@ class AudioFeatures {
   const AudioFeatures({
     required this.rms,
     required this.chroma,
+    this.chromaRaw = const [],
     this.yinHz,
     this.yinConfidence,
   });
 
   final double rms;
 
-  /// Length 12, non-negative; preferably L2-normalized.
+  /// Length 12, non-negative; preferably L2-normalized (after noise subtract).
   final List<double> chroma;
+
+  /// Pre-normalize chroma energy (for calibration / debugging).
+  final List<double> chromaRaw;
 
   final double? yinHz;
   final double? yinConfidence;

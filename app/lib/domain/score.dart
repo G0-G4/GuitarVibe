@@ -4,6 +4,7 @@
 import 'chord_guess.dart';
 import 'chord_recognizer.dart';
 import 'chord_tones.dart';
+import 'recognition_config.dart';
 import 'recognition_mode.dart';
 import 'song.dart';
 
@@ -142,9 +143,11 @@ class ScoreEngine {
     this.windows = HitWindows.standard,
     this.minPitchConfidence = 0.80,
     RecognitionMode mode = RecognitionMode.pitchClass,
+    RecognitionConfig config = RecognitionConfig.balanced,
     ChordRecognizer? recognizer,
   })  : _targets = _buildTargets(songEvents),
-        _recognizer = recognizer ?? ChordRecognizer(mode: mode);
+        _recognizer =
+            recognizer ?? ChordRecognizer(mode: mode, config: config);
 
   final HitWindows windows;
   final double minPitchConfidence;

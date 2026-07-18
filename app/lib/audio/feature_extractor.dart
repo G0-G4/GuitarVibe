@@ -6,6 +6,7 @@ import 'package:pitch_detector_dart/pitch_detector_result.dart';
 
 import '../domain/chord_guess.dart';
 import '../domain/chroma.dart';
+import '../domain/noise_suppress.dart';
 
 /// Builds [AudioFeatures] frames from a PCM16 byte stream.
 class FeatureExtractor {
@@ -14,12 +15,20 @@ class FeatureExtractor {
     this.bufferSize = PitchDetector.DEFAULT_BUFFER_SIZE,
     this.computeChroma = true,
     this.computeYin = true,
+    this.applyHighPass = true,
+    this.noiseChromaMean,
+    this.noiseSubtractGain = 1.0,
   });
 
   final int sampleRate;
   final int bufferSize;
   final bool computeChroma;
   final bool computeYin;
+  final bool applyHighPass;
+
+  /// Raw noise chroma mean from room calibration (optional).
+  List<double>? noiseChromaMean;
+  double noiseSubtractGain;
 
   PitchDetector? _detector;
   final BytesBuilder _pending = BytesBuilder();
@@ -78,12 +87,28 @@ class FeatureExtractor {
     if (_busy) return;
     _busy = true;
     try {
-      final floats = pcm16ToFloat(pcm16);
+      var floats = pcm16ToFloat(pcm16);
+      if (applyHighPass) {
+        floats = highPassSamples(
+          floats,
+          sampleRate: sampleRate.toDouble(),
+        );
+      }
       final rms = computeRms(floats);
 
+      List<double> chromaRaw = const [];
       List<double> chroma = const [];
       if (computeChroma) {
-        chroma = chromaFromSamples(floats, sampleRate: sampleRate.toDouble());
+        chromaRaw = chromaRawFromSamples(
+          floats,
+          sampleRate: sampleRate.toDouble(),
+        );
+        final cleaned = subtractChromaNoise(
+          chromaRaw,
+          noiseMean: noiseChromaMean,
+          gain: noiseSubtractGain,
+        );
+        chroma = l2Normalize(cleaned);
       }
 
       double? yinHz;
@@ -104,6 +129,7 @@ class FeatureExtractor {
         AudioFeatures(
           rms: rms,
           chroma: chroma,
+          chromaRaw: chromaRaw,
           yinHz: yinHz,
           yinConfidence: yinConf,
         ),
