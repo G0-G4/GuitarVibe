@@ -8,6 +8,9 @@ import 'guitar_sample_bank.dart';
 ///
 /// Uses a [GuitarSampleBank] preloaded at session start so the clock tick
 /// never does asset I/O (that was freezing the UI with open-chord polyphony).
+///
+/// Each new stroke crossfades: new attack first, previous ring eases out on
+/// a long residual curve; mute (`X`) hard-silences then plays the chuck.
 class GuitarGuidePlayer {
   GuitarGuidePlayer({GuitarSampleBank? bank})
       : _bank = bank ?? GuitarSampleBank();
@@ -20,19 +23,26 @@ class GuitarGuidePlayer {
   double _volume = 0.55;
   Song? _song;
 
+  /// Bumped on every new stroke / mute / pad so delayed string hits from a
+  /// previous stagger are dropped.
+  int _strokeGen = 0;
+
   /// When song has a strum pattern, skip pad entirely (strums carry harmony).
   static const double padSoloScale = 0.48;
   static const double strumDownScale = 0.78;
   static const double strumUpScale = 0.58;
-  static const double muteDownScale = 0.85;
-  static const double muteUpScale = 0.70;
+  /// Chuck sample gain. 0 = silence-only mute (ringing notes still stop).
+  /// Keep very low if re-enabled — mute.wav is a sharp transient.
+  static const double muteDownScale = 0.0;
+  static const double muteUpScale = 0.0;
 
   /// Cap strings per hit to keep macOS audio + UI smooth.
-  static const int maxStringsPerHit = 4;
+  /// 3 notes × dual buffer is enough harmony with far fewer platform calls.
+  static const int maxStringsPerHit = 3;
 
   /// Strum sweep across strings (ms between notes).
-  static const int strumDownStaggerMs = 12;
-  static const int strumUpStaggerMs = 10;
+  static const int strumDownStaggerMs = 10;
+  static const int strumUpStaggerMs = 8;
 
   double get volume => _volume;
 
@@ -47,6 +57,7 @@ class GuitarGuidePlayer {
     _enabled = style != 'none';
     _volume = (volume ?? song.accompaniment.volume).clamp(0.0, 1.0);
     _scheduler.reset();
+    _strokeGen++;
 
     if (!_enabled) {
       _prepared = true;
@@ -61,7 +72,10 @@ class GuitarGuidePlayer {
     _volume = volume.clamp(0.0, 1.0);
   }
 
-  void reset() => _scheduler.reset();
+  void reset() {
+    _scheduler.reset();
+    _strokeGen++;
+  }
 
   /// Call on every clock tick. Intentionally non-blocking after scheduling.
   Future<void> onBeat(double beat) async {
@@ -76,15 +90,21 @@ class GuitarGuidePlayer {
 
     // With a strum pattern, skip pad — it doubled polyphony and muddied audio.
     if (actions.hasPad && !hasStrumPattern) {
+      _beginStroke();
+      // Detach previous ring (release after new attack — real crossfade).
+      _bank.dampenNotes(style: NoteReleaseStyle.pad);
       _playNotes(
         actions.padNotes,
         volume: _volume * padSoloScale,
         staggerMs: 4,
         bassHeavy: true,
+        strokeGen: _strokeGen,
       );
     }
 
     if (actions.mute) {
+      _beginStroke();
+      // Fast soft mute of ringing notes; chuck sample off by default (loud click).
       _bank.playMute(
         upstroke: actions.muteUp,
         volume: _volume * (actions.muteUp ? muteUpScale : muteDownScale),
@@ -95,19 +115,28 @@ class GuitarGuidePlayer {
     if (actions.hasStrum) {
       final token = (actions.strumToken ?? 'D').toUpperCase();
       final isUp = token == 'U';
+      _beginStroke();
+      // Crossfade: schedule soft-release of previous, start new sweep first.
+      _bank.dampenNotes(style: NoteReleaseStyle.stroke);
       _playNotes(
         actions.strumNotes,
         volume: _volume * (isUp ? strumUpScale : strumDownScale),
         staggerMs: isUp ? strumUpStaggerMs : strumDownStaggerMs,
         bassHeavy: !isUp,
         trebleHeavy: isUp,
+        strokeGen: _strokeGen,
       );
     }
+  }
+
+  void _beginStroke() {
+    _strokeGen++;
   }
 
   void _playNotes(
     List<int> midiNotes, {
     required double volume,
+    required int strokeGen,
     int staggerMs = 0,
     bool bassHeavy = false,
     bool trebleHeavy = false,
@@ -138,10 +167,11 @@ class GuitarGuidePlayer {
       if (staggerMs > 0 && i > 0) {
         final delay = Duration(milliseconds: staggerMs * i);
         unawaited(Future<void>.delayed(delay, () {
-          if (!_prepared) return;
+          if (!_prepared || strokeGen != _strokeGen) return;
           _bank.playNote(midi, volume: noteGain);
         }));
       } else {
+        if (strokeGen != _strokeGen) return;
         _bank.playNote(midi, volume: noteGain);
       }
     }
@@ -165,12 +195,14 @@ class GuitarGuidePlayer {
 
   Future<void> stop() async {
     _scheduler.reset();
+    _strokeGen++;
     await _bank.stopAll();
   }
 
   Future<void> dispose() async {
     _prepared = false;
     _song = null;
+    _strokeGen++;
     await _bank.dispose();
   }
 }

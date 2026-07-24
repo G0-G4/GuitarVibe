@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:just_audio/just_audio.dart';
 
 import '../domain/song.dart';
@@ -87,9 +89,14 @@ class MetronomePlayer {
 
     final isAccent = _isAccent(integerBeat);
     final player = isAccent ? _accent : _click;
+    // Fire-and-forget so clock ticks never stall on platform audio I/O.
+    unawaited(_fire(player));
+  }
+
+  Future<void> _fire(AudioPlayer player) async {
     try {
       await player.seek(Duration.zero);
-      await player.play();
+      unawaited(player.play());
     } catch (_) {
       // Audio glitches should not crash the session.
     }
