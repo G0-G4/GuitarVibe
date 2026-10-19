@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 
+import '../../../domain/chord_runs.dart';
 import '../../../domain/song.dart';
 
 /// Horizontal chord timeline with a fixed playhead.
+///
+/// Back-to-back events with the same chord are drawn as one card
+/// (see [mergeChordRuns]) so a held chord never looks like a change.
 ///
 /// Position: `x = playheadX + (event.beat - currentBeat) * pxPerBeat`.
 ///
@@ -78,6 +82,7 @@ class _ChordScrollerState extends State<ChordScroller> {
         final height = constraints.maxHeight;
         final playheadX = width * widget.playheadFraction;
         final displayBeat = _displayBeat;
+        final runs = mergeChordRuns(widget.events);
 
         Widget lane = ClipRect(
           child: Stack(
@@ -92,7 +97,7 @@ class _ChordScrollerState extends State<ChordScroller> {
                 ),
               ),
               // Chord cards
-              for (final event in widget.events)
+              for (final event in runs)
                 _ChordCard(
                   event: event,
                   currentBeat: displayBeat,
@@ -206,7 +211,7 @@ class _ChordCard extends StatelessWidget {
 
     final left = playheadX + (event.beat - currentBeat) * pxPerBeat;
     final cardWidth =
-        (event.durationBeats * pxPerBeat).clamp(56.0, 400.0).toDouble();
+        (event.durationBeats * pxPerBeat).clamp(56.0, double.infinity).toDouble();
 
     // Cull off-screen
     if (left + cardWidth < -20 || left > MediaQuery.sizeOf(context).width + 20) {
