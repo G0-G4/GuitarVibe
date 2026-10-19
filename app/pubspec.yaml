@@ -75,6 +75,8 @@ flutter:
     - assets/songs/zvezda-po-imeni-solntse/
     - assets/songs/zvezda-po-imeni-solntse/audio/
     - assets/songs/dyhanie/
+    - assets/songs/v-lesu-rodilas-yolochka/
+    - assets/songs/vo-sadu-li/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

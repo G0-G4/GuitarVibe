@@ -1,0 +1,16 @@
+{title: В лесу родилась ёлочка}
+{artist: Л. Бекман / Р. Кудашева}
+{key: A}
+{tempo: 100}
+{time: 4/4}
+{duration: 4}
+{comment: Original is 2/4; here one 4/4 bar = one line of the verse.}
+{comment: Lyrics R. Kudasheva (1903). Public domain in US; protected in RU until ~2035 — personal use only.}
+{comment: Бой: двойка ↓ · ↓↑ ↓ · ↓↑}
+
+{start_of_verse}
+[A]В лесу родилась ёлочка,
+[E@2]В лесу она [A@2]росла,
+[A@2]Зимой и летом [D@2]стройная,
+[E@2]Зелёная [A@2]была.
+{end_of_verse}

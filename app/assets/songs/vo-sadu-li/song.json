@@ -1,0 +1,192 @@
+{
+  "schemaVersion": 1,
+  "id": "vo-sadu-li",
+  "title": "Во саду ли, в огороде",
+  "artist": "Русская народная",
+  "key": "A",
+  "capo": 0,
+  "tempoBpm": 110,
+  "timeSignature": [
+    4,
+    4
+  ],
+  "tags": [
+    "russian",
+    "folk",
+    "beginner",
+    "two-chord",
+    "A",
+    "E"
+  ],
+  "audio": null,
+  "strum": {
+    "name": "Двойка",
+    "unitBeats": 0.5,
+    "steps": [
+      "D",
+      ".",
+      "D",
+      "U",
+      "D",
+      ".",
+      "D",
+      "U"
+    ]
+  },
+  "sections": [
+    {
+      "id": "intro",
+      "name": "Вступление",
+      "events": [
+        {
+          "beat": 0,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": ""
+        },
+        {
+          "beat": 4,
+          "durationBeats": 2,
+          "chord": "E",
+          "lyrics": ""
+        },
+        {
+          "beat": 6,
+          "durationBeats": 2,
+          "chord": "A",
+          "lyrics": ""
+        }
+      ]
+    },
+    {
+      "id": "verse1",
+      "name": "Куплет 1",
+      "events": [
+        {
+          "beat": 8,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "Во саду ли, в огороде"
+        },
+        {
+          "beat": 12,
+          "durationBeats": 2,
+          "chord": "E",
+          "lyrics": "Девица гуляла,"
+        },
+        {
+          "beat": 14,
+          "durationBeats": 2,
+          "chord": "A",
+          "lyrics": ""
+        },
+        {
+          "beat": 16,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "Она ростом невеличка,"
+        },
+        {
+          "beat": 20,
+          "durationBeats": 2,
+          "chord": "E",
+          "lyrics": "Лицом круглоличка."
+        },
+        {
+          "beat": 22,
+          "durationBeats": 2,
+          "chord": "A",
+          "lyrics": ""
+        }
+      ]
+    },
+    {
+      "id": "verse2",
+      "name": "Куплет 2",
+      "events": [
+        {
+          "beat": 24,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "За ней ходит, за ней бродит"
+        },
+        {
+          "beat": 28,
+          "durationBeats": 2,
+          "chord": "E",
+          "lyrics": "Удалой молодчик,"
+        },
+        {
+          "beat": 30,
+          "durationBeats": 2,
+          "chord": "A",
+          "lyrics": ""
+        },
+        {
+          "beat": 32,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "Он несёт, несёт подарок,"
+        },
+        {
+          "beat": 36,
+          "durationBeats": 2,
+          "chord": "E",
+          "lyrics": "Дорогой подарок."
+        },
+        {
+          "beat": 38,
+          "durationBeats": 2,
+          "chord": "A",
+          "lyrics": ""
+        }
+      ]
+    },
+    {
+      "id": "outro",
+      "name": "Проигрыш",
+      "events": [
+        {
+          "beat": 40,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": ""
+        },
+        {
+          "beat": 44,
+          "durationBeats": 2,
+          "chord": "E",
+          "lyrics": ""
+        },
+        {
+          "beat": 46,
+          "durationBeats": 2,
+          "chord": "A",
+          "lyrics": ""
+        },
+        {
+          "beat": 48,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": ""
+        },
+        {
+          "beat": 52,
+          "durationBeats": 2,
+          "chord": "E",
+          "lyrics": ""
+        },
+        {
+          "beat": 54,
+          "durationBeats": 2,
+          "chord": "A",
+          "lyrics": ""
+        }
+      ]
+    }
+  ],
+  "accompaniment": {
+    "style": "metronome_and_pad",
+    "volume": 0.8
+  }
+}

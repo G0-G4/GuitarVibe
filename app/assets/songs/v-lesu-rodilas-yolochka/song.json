@@ -1,0 +1,349 @@
+{
+  "schemaVersion": 1,
+  "id": "v-lesu-rodilas-yolochka",
+  "title": "В лесу родилась ёлочка",
+  "artist": "Л. Бекман / Р. Кудашева",
+  "key": "A",
+  "capo": 0,
+  "tempoBpm": 100,
+  "timeSignature": [
+    4,
+    4
+  ],
+  "tags": [
+    "russian",
+    "kids",
+    "beginner",
+    "three-chord",
+    "A",
+    "D",
+    "E"
+  ],
+  "audio": null,
+  "strum": {
+    "name": "Двойка",
+    "unitBeats": 0.5,
+    "steps": [
+      "D",
+      ".",
+      "D",
+      "U",
+      "D",
+      ".",
+      "D",
+      "U"
+    ]
+  },
+  "sections": [
+    {
+      "id": "intro",
+      "name": "Вступление",
+      "events": [
+        {
+          "beat": 0,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": ""
+        },
+        {
+          "beat": 4,
+          "durationBeats": 4,
+          "chord": "E",
+          "lyrics": ""
+        }
+      ]
+    },
+    {
+      "id": "verse1",
+      "name": "Куплет 1",
+      "events": [
+        {
+          "beat": 8,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "В лесу родилась ёлочка,"
+        },
+        {
+          "beat": 12,
+          "durationBeats": 2,
+          "chord": "E",
+          "lyrics": "В лесу она росла,"
+        },
+        {
+          "beat": 14,
+          "durationBeats": 2,
+          "chord": "A",
+          "lyrics": ""
+        },
+        {
+          "beat": 16,
+          "durationBeats": 2,
+          "chord": "A",
+          "lyrics": "Зимой и летом стройная,"
+        },
+        {
+          "beat": 18,
+          "durationBeats": 2,
+          "chord": "D",
+          "lyrics": ""
+        },
+        {
+          "beat": 20,
+          "durationBeats": 2,
+          "chord": "E",
+          "lyrics": "Зелёная была."
+        },
+        {
+          "beat": 22,
+          "durationBeats": 2,
+          "chord": "A",
+          "lyrics": ""
+        }
+      ]
+    },
+    {
+      "id": "verse2",
+      "name": "Куплет 2",
+      "events": [
+        {
+          "beat": 24,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "Метель ей пела песенку:"
+        },
+        {
+          "beat": 28,
+          "durationBeats": 2,
+          "chord": "E",
+          "lyrics": "«Спи, ёлочка, бай-бай!»"
+        },
+        {
+          "beat": 30,
+          "durationBeats": 2,
+          "chord": "A",
+          "lyrics": ""
+        },
+        {
+          "beat": 32,
+          "durationBeats": 2,
+          "chord": "A",
+          "lyrics": "Мороз снежком укутывал:"
+        },
+        {
+          "beat": 34,
+          "durationBeats": 2,
+          "chord": "D",
+          "lyrics": ""
+        },
+        {
+          "beat": 36,
+          "durationBeats": 2,
+          "chord": "E",
+          "lyrics": "«Смотри, не замерзай!»"
+        },
+        {
+          "beat": 38,
+          "durationBeats": 2,
+          "chord": "A",
+          "lyrics": ""
+        }
+      ]
+    },
+    {
+      "id": "verse3",
+      "name": "Куплет 3",
+      "events": [
+        {
+          "beat": 40,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "Трусишка зайка серенький"
+        },
+        {
+          "beat": 44,
+          "durationBeats": 2,
+          "chord": "E",
+          "lyrics": "Под ёлочкой скакал."
+        },
+        {
+          "beat": 46,
+          "durationBeats": 2,
+          "chord": "A",
+          "lyrics": ""
+        },
+        {
+          "beat": 48,
+          "durationBeats": 2,
+          "chord": "A",
+          "lyrics": "Порою волк, сердитый волк,"
+        },
+        {
+          "beat": 50,
+          "durationBeats": 2,
+          "chord": "D",
+          "lyrics": ""
+        },
+        {
+          "beat": 52,
+          "durationBeats": 2,
+          "chord": "E",
+          "lyrics": "Рысцою пробегал."
+        },
+        {
+          "beat": 54,
+          "durationBeats": 2,
+          "chord": "A",
+          "lyrics": ""
+        }
+      ]
+    },
+    {
+      "id": "verse4",
+      "name": "Куплет 4",
+      "events": [
+        {
+          "beat": 56,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "Чу! Снег по лесу частому"
+        },
+        {
+          "beat": 60,
+          "durationBeats": 2,
+          "chord": "E",
+          "lyrics": "Под полозом скрипит;"
+        },
+        {
+          "beat": 62,
+          "durationBeats": 2,
+          "chord": "A",
+          "lyrics": ""
+        },
+        {
+          "beat": 64,
+          "durationBeats": 2,
+          "chord": "A",
+          "lyrics": "Лошадка мохноногая"
+        },
+        {
+          "beat": 66,
+          "durationBeats": 2,
+          "chord": "D",
+          "lyrics": ""
+        },
+        {
+          "beat": 68,
+          "durationBeats": 2,
+          "chord": "E",
+          "lyrics": "Торопится, бежит."
+        },
+        {
+          "beat": 70,
+          "durationBeats": 2,
+          "chord": "A",
+          "lyrics": ""
+        }
+      ]
+    },
+    {
+      "id": "verse5",
+      "name": "Куплет 5",
+      "events": [
+        {
+          "beat": 72,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "Везёт лошадка дровенки,"
+        },
+        {
+          "beat": 76,
+          "durationBeats": 2,
+          "chord": "E",
+          "lyrics": "А в дровнях мужичок,"
+        },
+        {
+          "beat": 78,
+          "durationBeats": 2,
+          "chord": "A",
+          "lyrics": ""
+        },
+        {
+          "beat": 80,
+          "durationBeats": 2,
+          "chord": "A",
+          "lyrics": "Срубил он нашу ёлочку"
+        },
+        {
+          "beat": 82,
+          "durationBeats": 2,
+          "chord": "D",
+          "lyrics": ""
+        },
+        {
+          "beat": 84,
+          "durationBeats": 2,
+          "chord": "E",
+          "lyrics": "Под самый корешок."
+        },
+        {
+          "beat": 86,
+          "durationBeats": 2,
+          "chord": "A",
+          "lyrics": ""
+        }
+      ]
+    },
+    {
+      "id": "verse6",
+      "name": "Куплет 6",
+      "events": [
+        {
+          "beat": 88,
+          "durationBeats": 4,
+          "chord": "A",
+          "lyrics": "И вот она, нарядная,"
+        },
+        {
+          "beat": 92,
+          "durationBeats": 2,
+          "chord": "E",
+          "lyrics": "На праздник к нам пришла,"
+        },
+        {
+          "beat": 94,
+          "durationBeats": 2,
+          "chord": "A",
+          "lyrics": ""
+        },
+        {
+          "beat": 96,
+          "durationBeats": 2,
+          "chord": "A",
+          "lyrics": "И много-много радости"
+        },
+        {
+          "beat": 98,
+          "durationBeats": 2,
+          "chord": "D",
+          "lyrics": ""
+        },
+        {
+          "beat": 100,
+          "durationBeats": 2,
+          "chord": "E",
+          "lyrics": "Детишкам принесла."
+        },
+        {
+          "beat": 102,
+          "durationBeats": 2,
+          "chord": "A",
+          "lyrics": ""
+        }
+      ]
+    }
+  ],
+  "accompaniment": {
+    "style": "metronome_and_pad",
+    "volume": 0.8
+  }
+}
